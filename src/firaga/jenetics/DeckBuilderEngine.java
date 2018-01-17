@@ -17,35 +17,66 @@
 
 package firaga.jenetics;
 
-import java.util.ArrayList;
+import java.util.function.Predicate;
 
+import io.jenetics.Alterer;
+import io.jenetics.AltererResult;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
+import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
+import io.jenetics.Selector;
+import io.jenetics.engine.EvolutionDurations;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStart;
+import io.jenetics.engine.EvolutionStream;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
+import magic.model.MagicCardDefinition;
 
 public final class DeckBuilderEngine {
 	
-	private final Factory<Genotype<IntegerGene>> GTF;
+	private final ISeq<MagicCardDefinition> cardPool;
 	private final int cardPoolSize;
+	private final Factory<Genotype<IntegerGene>> GTF;
 	
-	// TODO proper card pool type
-	public DeckBuilderEngine(final ArrayList<Integer> cardPool) {
-		cardPoolSize = cardPool.size();
-		GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
+	// Genetic algorithm parameters
+	private static final int populationSize = 0;
+	private static final int survivorCount = 0;
+	private static final int offspringCount = 0;
+	private static final int maxAge = 0;
+	private static final Selector<IntegerGene, Integer> survivorSelector =
+			null;
+	private static final Selector<IntegerGene, Integer> offspringSelector =
+			null;
+	private static final Alterer<IntegerGene, Integer> alterer =
+			null;
+	private static final Predicate<EvolutionResult<IntegerGene, Integer>> limitPredicate =
+			null;
+	
+	public DeckBuilderEngine(final ISeq<MagicCardDefinition> cardPool) {
+		this.cardPool = cardPool;
+		this.cardPoolSize = cardPool.size();
+		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
 	}
 	
-	private static Integer fitness(final Genotype<IntegerGene> gt) {
+	public final EvolutionResult<IntegerGene, Integer>
+	run() {
+		return EvolutionStream.of(
+				() -> this.start(populationSize, 0),
+				this::evolve)
+				.limit(limitPredicate)
+				.collect(EvolutionResult.toBestEvolutionResult());
+	}
+	
+	private static final Integer fitness(final Genotype<IntegerGene> gt) {
 		// TODO stub
 		// Fitness value will already be saved in a file,
 		// so just read it.
 		return 0;
 	}
 	
-	private EvolutionStart<IntegerGene, Integer>
+	private final EvolutionStart<IntegerGene, Integer>
 	start(final int populationSize, final long generation) {
 		final ISeq<Phenotype<IntegerGene, Integer>> population =
 				GTF.instances()
@@ -55,11 +86,49 @@ public final class DeckBuilderEngine {
 		return EvolutionStart.of(population, generation);
 	}
 	
-	private EvolutionResult<IntegerGene, Integer>
+	private final EvolutionResult<IntegerGene, Integer>
 	evolve(final EvolutionStart<IntegerGene, Integer> start) {
-		// TODO stub
-		// Play games and save results to file in this step
-		return null;
+		final ISeq<Phenotype<IntegerGene, Integer>> population = start.getPopulation();
+		final long generation = start.getGeneration();
+
+		final ISeq<Phenotype<IntegerGene, Integer>> offsprings = offspringSelector.select(population, offspringCount, Optimize.MAXIMUM);
+		final ISeq<Phenotype<IntegerGene, Integer>> survivors = survivorSelector.select(population, survivorCount, Optimize.MAXIMUM);
+
+		final AltererResult<IntegerGene, Integer> alterResult = alterer.alter(offsprings, generation);
+		final ISeq<Phenotype<IntegerGene, Integer>> alteredOffsprings = alterResult.getPopulation();
+		final int alterCount = alterResult.getAlterations();
+
+		// TODO kill old individuals
+		final ISeq<Phenotype<IntegerGene, Integer>> nextPopulation = ISeq.empty();
+		nextPopulation.append(survivors);
+		nextPopulation.append(alteredOffsprings);
+		
+		final ISeq<Phenotype<IntegerGene, Integer>> invalidFilteredNextPopulation = nextPopulation.stream()
+				.filter(i -> !i.isValid())
+				.collect(ISeq.toISeq());
+		final int invalidCount = nextPopulation.size() - invalidFilteredNextPopulation.size();
+		final ISeq<Phenotype<IntegerGene, Integer>> filteredNextPopulation = invalidFilteredNextPopulation.stream()
+				.filter(i -> i.getAge(generation) <= maxAge)
+				.collect(ISeq.toISeq());
+		final int killCount = invalidFilteredNextPopulation.size() - filteredNextPopulation.size();
+		
+		final ISeq<Phenotype<IntegerGene, Integer>> replacementPopulation = GTF.instances()
+				.map(gt -> Phenotype.of(gt, generation, DeckBuilderEngine::fitness))
+				.limit(populationSize - nextPopulation.size())
+				.collect(ISeq.toISeq());
+		
+		filteredNextPopulation.append(replacementPopulation);
+				
+		// TODO create deck
+		// TODO Play games and save results to file
+		return EvolutionResult.of(
+				Optimize.MAXIMUM,
+				filteredNextPopulation,
+				generation,
+				EvolutionDurations.ZERO,
+				killCount,
+				invalidCount,
+				alterCount);
 	}
 	
 }
