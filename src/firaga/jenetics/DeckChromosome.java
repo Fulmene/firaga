@@ -34,12 +34,13 @@ import io.jenetics.util.RandomRegistry;
 public final class DeckChromosome implements NumericChromosome<Integer, IntegerGene> {
 
 	private final int cardPoolSize;
-	private ISeq<IntegerGene> genes;
+	private final ISeq<IntegerGene> genes;
 
 	private static final IntegerGene GENE_PROTOTYPE = IntegerGene.of(0, MagicConstants.MAX_COPIES);
 
 	public DeckChromosome(final int cardPoolSize) {
 		this.cardPoolSize = cardPoolSize;
+		this.genes = null;
 	}
 	
 	private DeckChromosome(final ISeq<IntegerGene> genes, final int cardPoolSize) {
@@ -48,38 +49,38 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 	}
 	
 	@Override
-	public IntegerGene getGene(int index) {
+	public final IntegerGene getGene(int index) {
 		return genes.get(index);
 	}
 
 	@Override
-	public int length() {
+	public final int length() {
 		return cardPoolSize;
 	}
 
 	@Override
-	public Chromosome<IntegerGene> newInstance(ISeq<IntegerGene> genes) {
+	public final Chromosome<IntegerGene> newInstance(ISeq<IntegerGene> genes) {
 		return new DeckChromosome(validateDeckSize(genes), this.cardPoolSize);
 	}
 
 	@Override
-	public ISeq<IntegerGene> toSeq() {
+	public final ISeq<IntegerGene> toSeq() {
 		return this.genes;
 	}
 
 	@Override
-	public boolean isValid() {
+	public final boolean isValid() {
 		final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
 		return spellCount >= MagicConstants.MIN_SPELLS && spellCount <= MagicConstants.MAX_SPELLS;
 	}
 
 	@Override
-	public Iterator<IntegerGene> iterator() {
+	public final Iterator<IntegerGene> iterator() {
 		return genes.iterator();
 	}
 
 	@Override
-	public Chromosome<IntegerGene> newInstance() {
+	public final Chromosome<IntegerGene> newInstance() {
 		ISeq<IntegerGene> emptyGenes = ISeq.of(Collections.nCopies(this.cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
 		final int targetSpellCount = MagicConstants.MIN_SPELLS + RandomRegistry.getRandom().nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
 		ISeq<IntegerGene> genes = addCards(emptyGenes, targetSpellCount, true);
@@ -101,6 +102,10 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 		else {
 			return genes;
 		}
+	}
+	
+	public static final DeckChromosome of(final int cardPoolSize) {
+		return new DeckChromosome(cardPoolSize);
 	}
 	
 	private static final ISeq<IntegerGene> addCards(final ISeq<IntegerGene> genes, final int targetSpellCount, final boolean useNewCards) {
