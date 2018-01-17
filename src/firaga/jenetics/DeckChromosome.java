@@ -142,7 +142,7 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 			spellCount++;
 		}
 		
-		return ISeq.of(newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(Collectors.toList()));
+		return newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
 	}
 	
 	private static final ISeq<IntegerGene> removeCards(final ISeq<IntegerGene> genes, final int targetSpellCount) {
@@ -167,7 +167,7 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 			spellCount--;
 		}
 	
-		return ISeq.of(newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(Collectors.toList()));
+		return newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
 	}
 
 }
