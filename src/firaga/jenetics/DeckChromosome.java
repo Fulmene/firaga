@@ -17,6 +17,7 @@
 
 package firaga.jenetics;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -109,16 +110,15 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 	}
 	
 	private static final ISeq<IntegerGene> addCards(final ISeq<IntegerGene> genes, final int targetSpellCount, final boolean useNewCards) {
-		final List<Integer> newGenes = genes.stream().map(g -> g.intValue()).collect(Collectors.toList()); 
-		int spellCount = newGenes.stream().mapToInt(Integer::intValue).sum();
+		final int[] newGenes = genes.stream().mapToInt(g -> g.intValue()).toArray();
+		int spellCount = Arrays.stream(newGenes).sum();
 
 		final int cardPoolSize = genes.size();
 		final Random random = RandomRegistry.getRandom();
 
 		List<Integer> availableCards = IntStream.range(0, cardPoolSize)
 				.filter(n -> {
-					final int number = genes.get(n).intValue();
-					return (useNewCards || number > 0) && number < MagicConstants.MAX_COPIES; })
+					return (useNewCards || newGenes[n] > 0) && newGenes[n] < MagicConstants.MAX_COPIES; })
 				.boxed()
 				.collect(Collectors.toList());
 
@@ -129,45 +129,43 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 			// So, add unused cards to availableCards.
 			if (availableCards.isEmpty()) {
 				IntStream.range(0, cardPoolSize)
-					.filter(n -> newGenes.get(n) == 0)
+					.filter(n -> newGenes[n] == 0)
 					.forEachOrdered(availableCards::add);
 			}
 
 			final int selectedIndex = random.nextInt(availableCards.size());
 			final int selected = availableCards.get(selectedIndex);
-			final int number = newGenes.get(selected);
-			newGenes.set(selected, number + 1);
-			if (number + 1 == MagicConstants.MAX_COPIES)
+			newGenes[selected]++;
+			if (newGenes[selected] == MagicConstants.MAX_COPIES)
 				availableCards.remove(selectedIndex);
 			spellCount++;
 		}
 		
-		return newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
+		return Arrays.stream(newGenes).boxed().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
 	}
 	
 	private static final ISeq<IntegerGene> removeCards(final ISeq<IntegerGene> genes, final int targetSpellCount) {
-		final List<Integer> newGenes = genes.stream().map(g -> g.intValue()).collect(Collectors.toList()); 
-		int spellCount = newGenes.stream().mapToInt(Integer::intValue).sum();
+		final int[] newGenes = genes.stream().mapToInt(g -> g.intValue()).toArray();
+		int spellCount = Arrays.stream(newGenes).sum();
 
 		final int cardPoolSize = genes.size();
 		final Random random = RandomRegistry.getRandom();
 
 		List<Integer> availableCards = IntStream.range(0, cardPoolSize)
-				.filter(n -> genes.get(n).intValue() > 0)
+				.filter(n -> newGenes[n] > 0)
 				.boxed()
 				.collect(Collectors.toList());
 
 		while (spellCount < targetSpellCount) {
 			final int selectedIndex = random.nextInt(availableCards.size());
 			final int selected = availableCards.get(selectedIndex);
-			final int number = newGenes.get(selected);
-			newGenes.set(selected, number - 1);
-			if (number - 1 == 0)
+			newGenes[selected]--;
+			if (newGenes[selected] == 0)
 				availableCards.remove(selectedIndex);
 			spellCount--;
 		}
 	
-		return newGenes.stream().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
+		return Arrays.stream(newGenes).boxed().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
 	}
 
 }
