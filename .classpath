@@ -2,5 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jenetics/jenetics-4.0.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/fulmene/Documents/chula/senior-project/code/firaga/lib/jenetics/javadoc/jenetics/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/Magarena/Magarena.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head>
+<title></title>
+  <style type="text/css">
+    <!--code { font-family: Courier New, Courier; font-size: 10pt; margin: 0px; }-->
+  </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head><body>
+
+
+<!-- ======================================================== -->
+<!-- = Java Sourcecode to HTML automatically converted code = -->
+<!-- =   Java2Html Converter 5.0 [2006-02-26] by Markus Gebhard  markus@jave.de   = -->
+<!-- =     Further information: http://www.java2html.de     = -->
+<div align="left" class="java">
+<table border="2" cellpadding="3" cellspacing="0" bgcolor="#ffffff">
+  <!-- start headline -->
+   <tr>
+    <td colspan="2">
+     <center><font size="+2">
+      <code><b>
+Knapsack.java
+      </b></code>
+     </font></center>
+    </td>
+   </tr>
+  <!-- end headline -->
+   <tr>
+  <!-- start source code -->
+   <td nowrap="nowrap" valign="top" align="left">
+    <code>
+<font color="#808080">001</font>&nbsp;<font color="#7f0055"><b>import&nbsp;static&nbsp;</b></font><font color="#000000">io.jenetics.engine.EvolutionResult.toBestPhenotype;</font><br />
+<font color="#808080">002</font>&nbsp;<font color="#7f0055"><b>import&nbsp;static&nbsp;</b></font><font color="#000000">io.jenetics.engine.Limits.bySteadyFitness;</font><br />
+<font color="#808080">003</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">004</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">java.util.Random;</font><br />
+<font color="#808080">005</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">java.util.function.Function;</font><br />
+<font color="#808080">006</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">java.util.stream.Collector;</font><br />
+<font color="#808080">007</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">java.util.stream.Stream;</font><br />
+<font color="#808080">008</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">009</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.BitGene;</font><br />
+<font color="#808080">010</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.Mutator;</font><br />
+<font color="#808080">011</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.Phenotype;</font><br />
+<font color="#808080">012</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.RouletteWheelSelector;</font><br />
+<font color="#808080">013</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.SinglePointCrossover;</font><br />
+<font color="#808080">014</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.TournamentSelector;</font><br />
+<font color="#808080">015</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.engine.Codecs;</font><br />
+<font color="#808080">016</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.engine.Engine;</font><br />
+<font color="#808080">017</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.engine.EvolutionStatistics;</font><br />
+<font color="#808080">018</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.util.ISeq;</font><br />
+<font color="#808080">019</font>&nbsp;<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">io.jenetics.util.RandomRegistry;</font><br />
+<font color="#808080">020</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">021</font>&nbsp;<font color="#3f7f5f">//&nbsp;The&nbsp;main&nbsp;class.</font><br />
+<font color="#808080">022</font>&nbsp;<font color="#7f0055"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">Knapsack&nbsp;</font><font color="#000000">{</font><br />
+<font color="#808080">023</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">024</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;This&nbsp;class&nbsp;represents&nbsp;a&nbsp;knapsack&nbsp;item,&nbsp;with&nbsp;a&nbsp;specific</font><br />
+<font color="#808080">025</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;&#34;size&#34;&nbsp;and&nbsp;&#34;value&#34;.</font><br />
+<font color="#808080">026</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;static&nbsp;class&nbsp;</b></font><font color="#000000">Item&nbsp;</font><font color="#000000">{</font><br />
+<font color="#808080">027</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">size;</font><br />
+<font color="#808080">028</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">value;</font><br />
+<font color="#808080">029</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">030</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Item</font><font color="#000000">(</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">size,&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">value</font><font color="#000000">)&nbsp;{</font><br />
+<font color="#808080">031</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>this</b></font><font color="#000000">.size&nbsp;=&nbsp;size;</font><br />
+<font color="#808080">032</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>this</b></font><font color="#000000">.value&nbsp;=&nbsp;value;</font><br />
+<font color="#808080">033</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">034</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">035</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Create&nbsp;a&nbsp;new&nbsp;random&nbsp;knapsack&nbsp;item.</font><br />
+<font color="#808080">036</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>static&nbsp;</b></font><font color="#000000">Item&nbsp;random</font><font color="#000000">()&nbsp;{</font><br />
+<font color="#808080">037</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">Random&nbsp;r&nbsp;=&nbsp;RandomRegistry.getRandom</font><font color="#000000">()</font><font color="#000000">;</font><br />
+<font color="#808080">038</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;new&nbsp;</b></font><font color="#000000">Item</font><font color="#000000">(</font><br />
+<font color="#808080">039</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">r.nextDouble</font><font color="#000000">()</font><font color="#000000">*</font><font color="#990000">100</font><font color="#000000">,</font><br />
+<font color="#808080">040</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">r.nextDouble</font><font color="#000000">()</font><font color="#000000">*</font><font color="#990000">100</font><br />
+<font color="#808080">041</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<font color="#808080">042</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">043</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">044</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Collector&nbsp;for&nbsp;summing&nbsp;up&nbsp;the&nbsp;knapsack&nbsp;items.</font><br />
+<font color="#808080">045</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>static&nbsp;</b></font><font color="#000000">Collector&lt;Item,&nbsp;?,&nbsp;Item&gt;&nbsp;toSum</font><font color="#000000">()&nbsp;{</font><br />
+<font color="#808080">046</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">Collector.of</font><font color="#000000">(</font><br />
+<font color="#808080">047</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">()&nbsp;</font><font color="#000000">-&gt;&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#7f0055"><b>double</b></font><font color="#000000">[</font><font color="#990000">2</font><font color="#000000">]</font><font color="#000000">,</font><br />
+<font color="#808080">048</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">(</font><font color="#000000">a,&nbsp;b</font><font color="#000000">)&nbsp;</font><font color="#000000">-&gt;&nbsp;</font><font color="#000000">{</font><font color="#000000">a</font><font color="#000000">[</font><font color="#990000">0</font><font color="#000000">]&nbsp;</font><font color="#000000">+=&nbsp;b.size;&nbsp;a</font><font color="#000000">[</font><font color="#990000">1</font><font color="#000000">]&nbsp;</font><font color="#000000">+=&nbsp;b.value;</font><font color="#000000">}</font><font color="#000000">,</font><br />
+<font color="#808080">049</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">(</font><font color="#000000">a,&nbsp;b</font><font color="#000000">)&nbsp;</font><font color="#000000">-&gt;&nbsp;</font><font color="#000000">{</font><font color="#000000">a</font><font color="#000000">[</font><font color="#990000">0</font><font color="#000000">]&nbsp;</font><font color="#000000">+=&nbsp;b</font><font color="#000000">[</font><font color="#990000">0</font><font color="#000000">]</font><font color="#000000">;&nbsp;a</font><font color="#000000">[</font><font color="#990000">1</font><font color="#000000">]&nbsp;</font><font color="#000000">+=&nbsp;b</font><font color="#000000">[</font><font color="#990000">1</font><font color="#000000">]</font><font color="#000000">;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">a;</font><font color="#000000">}</font><font color="#000000">,</font><br />
+<font color="#808080">050</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">r&nbsp;-&gt;&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">Item</font><font color="#000000">(</font><font color="#000000">r</font><font color="#000000">[</font><font color="#990000">0</font><font color="#000000">]</font><font color="#000000">,&nbsp;r</font><font color="#000000">[</font><font color="#990000">1</font><font color="#000000">])</font><br />
+<font color="#808080">051</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<font color="#808080">052</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">053</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">054</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">055</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Creating&nbsp;the&nbsp;fitness&nbsp;function.</font><br />
+<font color="#808080">056</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>static&nbsp;</b></font><font color="#000000">Function&lt;ISeq&lt;Item&gt;,&nbsp;Double&gt;</font><br />
+<font color="#808080">057</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">fitness</font><font color="#000000">(</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">size</font><font color="#000000">)&nbsp;{</font><br />
+<font color="#808080">058</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">items&nbsp;-&gt;&nbsp;</font><font color="#000000">{</font><br />
+<font color="#808080">059</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">Item&nbsp;sum&nbsp;=&nbsp;items.stream</font><font color="#000000">()</font><font color="#000000">.collect</font><font color="#000000">(</font><font color="#000000">Item.toSum</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<font color="#808080">060</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">sum.size&nbsp;&lt;=&nbsp;size&nbsp;?&nbsp;sum.value&nbsp;:&nbsp;</font><font color="#990000">0</font><font color="#000000">;</font><br />
+<font color="#808080">061</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><font color="#000000">;</font><br />
+<font color="#808080">062</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">063</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">064</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;static&nbsp;</b></font><font color="#7f0055"><b>void&nbsp;</b></font><font color="#000000">main</font><font color="#000000">(</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">String</font><font color="#000000">[]&nbsp;</font><font color="#000000">args</font><font color="#000000">)&nbsp;{</font><br />
+<font color="#808080">065</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#7f0055"><b>int&nbsp;</b></font><font color="#000000">nitems&nbsp;=&nbsp;</font><font color="#990000">15</font><font color="#000000">;</font><br />
+<font color="#808080">066</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#7f0055"><b>double&nbsp;</b></font><font color="#000000">kssize&nbsp;=&nbsp;nitems*</font><font color="#990000">100.0</font><font color="#000000">/</font><font color="#990000">3.0</font><font color="#000000">;</font><br />
+<font color="#808080">067</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">068</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">ISeq&lt;Item&gt;&nbsp;items&nbsp;=</font><br />
+<font color="#808080">069</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">Stream.generate</font><font color="#000000">(</font><font color="#000000">Item::random</font><font color="#000000">)</font><br />
+<font color="#808080">070</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.limit</font><font color="#000000">(</font><font color="#000000">nitems</font><font color="#000000">)</font><br />
+<font color="#808080">071</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.collect</font><font color="#000000">(</font><font color="#000000">ISeq.toISeq</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<font color="#808080">072</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">073</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Configure&nbsp;and&nbsp;build&nbsp;the&nbsp;evolution&nbsp;engine.</font><br />
+<font color="#808080">074</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">Engine&lt;BitGene,&nbsp;Double&gt;&nbsp;engine&nbsp;=&nbsp;Engine</font><br />
+<font color="#808080">075</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.builder</font><font color="#000000">(</font><font color="#000000">fitness</font><font color="#000000">(</font><font color="#000000">kssize</font><font color="#000000">)</font><font color="#000000">,&nbsp;Codecs.ofSubSet</font><font color="#000000">(</font><font color="#000000">items</font><font color="#000000">))</font><br />
+<font color="#808080">076</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.populationSize</font><font color="#000000">(</font><font color="#990000">500</font><font color="#000000">)</font><br />
+<font color="#808080">077</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.survivorsSelector</font><font color="#000000">(</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">TournamentSelector&lt;&gt;</font><font color="#000000">(</font><font color="#990000">5</font><font color="#000000">))</font><br />
+<font color="#808080">078</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.offspringSelector</font><font color="#000000">(</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">RouletteWheelSelector&lt;&gt;</font><font color="#000000">())</font><br />
+<font color="#808080">079</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.alterers</font><font color="#000000">(</font><br />
+<font color="#808080">080</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">Mutator&lt;&gt;</font><font color="#000000">(</font><font color="#990000">0.115</font><font color="#000000">)</font><font color="#000000">,</font><br />
+<font color="#808080">081</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">SinglePointCrossover&lt;&gt;</font><font color="#000000">(</font><font color="#990000">0.16</font><font color="#000000">))</font><br />
+<font color="#808080">082</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.build</font><font color="#000000">()</font><font color="#000000">;</font><br />
+<font color="#808080">083</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">084</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Create&nbsp;evolution&nbsp;statistics&nbsp;consumer.</font><br />
+<font color="#808080">085</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">EvolutionStatistics&lt;Double,&nbsp;?&gt;</font><br />
+<font color="#808080">086</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">statistics&nbsp;=&nbsp;EvolutionStatistics.ofNumber</font><font color="#000000">()</font><font color="#000000">;</font><br />
+<font color="#808080">087</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">088</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>final&nbsp;</b></font><font color="#000000">Phenotype&lt;BitGene,&nbsp;Double&gt;&nbsp;best&nbsp;=&nbsp;engine.stream</font><font color="#000000">()</font><br />
+<font color="#808080">089</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Truncate&nbsp;the&nbsp;evolution&nbsp;stream&nbsp;after&nbsp;7&nbsp;&#34;steady&#34;</font><br />
+<font color="#808080">090</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;generations.</font><br />
+<font color="#808080">091</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.limit</font><font color="#000000">(</font><font color="#000000">bySteadyFitness</font><font color="#000000">(</font><font color="#990000">7</font><font color="#000000">))</font><br />
+<font color="#808080">092</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;The&nbsp;evolution&nbsp;will&nbsp;stop&nbsp;after&nbsp;maximal&nbsp;100</font><br />
+<font color="#808080">093</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;generations.</font><br />
+<font color="#808080">094</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.limit</font><font color="#000000">(</font><font color="#990000">100</font><font color="#000000">)</font><br />
+<font color="#808080">095</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Update&nbsp;the&nbsp;evaluation&nbsp;statistics&nbsp;after</font><br />
+<font color="#808080">096</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;each&nbsp;generation</font><br />
+<font color="#808080">097</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.peek</font><font color="#000000">(</font><font color="#000000">statistics</font><font color="#000000">)</font><br />
+<font color="#808080">098</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;Collect&nbsp;(reduce)&nbsp;the&nbsp;evolution&nbsp;stream&nbsp;to</font><br />
+<font color="#808080">099</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#3f7f5f">//&nbsp;its&nbsp;best&nbsp;phenotype.</font><br />
+<font color="#808080">100</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">.collect</font><font color="#000000">(</font><font color="#000000">toBestPhenotype</font><font color="#000000">())</font><font color="#000000">;</font><br />
+<font color="#808080">101</font>&nbsp;<font color="#ffffff"></font><br />
+<font color="#808080">102</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">System.out.println</font><font color="#000000">(</font><font color="#000000">statistics</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<font color="#808080">103</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">System.out.println</font><font color="#000000">(</font><font color="#000000">best</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<font color="#808080">104</font>&nbsp;<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">}</font><br />
+<font color="#808080">105</font>&nbsp;<font color="#000000">}</font></code>
+    
+   </td>
+  <!-- end source code -->
+   </tr>
+</table>
+</div>
+<!-- =       END of automatically generated HTML code       = -->
+<!-- ======================================================== -->
+
+
+</body></html>
