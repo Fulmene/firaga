@@ -48,7 +48,7 @@ public final class DeckBuilderEngine {
 	private static final int populationSize = 100;
 	private static final int survivorCount = 25;
 	private static final int offspringCount = 75;
-	private static final int maxAge = 1000000;
+	//private static final int maxAge = 1000000;
 	private static final Selector<IntegerGene, Integer> survivorSelector =
 			new TournamentSelector<>(3);
 	private static final Selector<IntegerGene, Integer> offspringSelector =
@@ -106,15 +106,11 @@ public final class DeckBuilderEngine {
 		nextPopulation.append(survivors);
 		nextPopulation.append(alteredOffsprings);
 		
-		final ISeq<Phenotype<IntegerGene, Integer>> invalidFilteredNextPopulation = nextPopulation.stream()
+		final ISeq<Phenotype<IntegerGene, Integer>> filteredNextPopulation = nextPopulation.stream()
 				.filter(i -> !i.isValid())
 				.collect(ISeq.toISeq());
-		final int invalidCount = nextPopulation.size() - invalidFilteredNextPopulation.size();
-		final ISeq<Phenotype<IntegerGene, Integer>> filteredNextPopulation = invalidFilteredNextPopulation.stream()
-				.filter(i -> i.getAge(generation) <= maxAge)
-				.collect(ISeq.toISeq());
-		final int killCount = invalidFilteredNextPopulation.size() - filteredNextPopulation.size();
-		
+		final int invalidCount = nextPopulation.size() - filteredNextPopulation.size();
+	
 		final ISeq<Phenotype<IntegerGene, Integer>> replacementPopulation = GTF.instances()
 				.map(gt -> Phenotype.of(gt, generation, DeckBuilderEngine::fitness))
 				.limit(populationSize - nextPopulation.size())
@@ -128,8 +124,8 @@ public final class DeckBuilderEngine {
 				Optimize.MAXIMUM,
 				filteredNextPopulation,
 				generation,
-				EvolutionDurations.ZERO,
-				killCount,
+				EvolutionDurations.ZERO, // TODO stub
+				0, // kill count
 				invalidCount,
 				alterCount);
 	}
