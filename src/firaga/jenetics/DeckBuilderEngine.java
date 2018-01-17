@@ -45,23 +45,30 @@ public final class DeckBuilderEngine {
 	private final Factory<Genotype<IntegerGene>> GTF;
 	
 	// Genetic algorithm parameters
-	private static final int populationSize = 100;
-	private static final int survivorCount = 25;
-	private static final int offspringCount = 75;
+	private final int populationSize;
+	private final double survivorFraction;
+	private final int survivorCount;
+	private final int offspringCount;
 	//private static final int maxAge = 1000000;
-	private static final Selector<IntegerGene, Integer> survivorSelector =
-			new TournamentSelector<>(3);
-	private static final Selector<IntegerGene, Integer> offspringSelector =
-			new TournamentSelector<>(3);
-	private static final Alterer<IntegerGene, Integer> alterer = Alterer.of(
-				new UniformCrossover<>(0.5, 0.5),
-				new GaussianMutator<IntegerGene, Integer>(0.2)
-			);
+	private final Selector<IntegerGene, Integer> survivorSelector;
+	private final Selector<IntegerGene, Integer> offspringSelector;
+	private final Alterer<IntegerGene, Integer> alterer;
 	
 	public DeckBuilderEngine(final List<MagicCardDefinition> cardPool) {
 		this.cardPool = cardPool;
 		this.cardPoolSize = cardPool.size();
 		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
+
+		this.populationSize = 100;
+		this.survivorFraction = 0.25;
+		this.survivorCount = (int)(populationSize * survivorFraction);
+		this.offspringCount = populationSize - survivorCount;
+		
+		this.survivorSelector = new TournamentSelector<>(3);
+		this.offspringSelector = new TournamentSelector<>(3);
+		this.alterer = Alterer.of(
+				new UniformCrossover<>(0.5, 0.5),
+				new GaussianMutator<IntegerGene, Integer>(0.2));
 	}
 	
 	public final EvolutionResult<IntegerGene, Integer>
