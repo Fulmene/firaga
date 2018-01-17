@@ -17,44 +17,48 @@
 
 package firaga.jenetics;
 
-import java.util.function.Predicate;
+import java.util.List;
 
 import io.jenetics.Alterer;
 import io.jenetics.AltererResult;
+import io.jenetics.GaussianMutator;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
 import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
 import io.jenetics.Selector;
+import io.jenetics.TournamentSelector;
+import io.jenetics.UniformCrossover;
 import io.jenetics.engine.EvolutionDurations;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStart;
 import io.jenetics.engine.EvolutionStream;
+import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
 import magic.model.MagicCardDefinition;
 
 public final class DeckBuilderEngine {
 	
-	private final ISeq<MagicCardDefinition> cardPool;
+	private final List<MagicCardDefinition> cardPool;
 	private final int cardPoolSize;
 	private final Factory<Genotype<IntegerGene>> GTF;
 	
 	// Genetic algorithm parameters
-	private static final int populationSize = 0;
-	private static final int survivorCount = 0;
-	private static final int offspringCount = 0;
-	private static final int maxAge = 0;
+	private static final int populationSize = 100;
+	private static final int survivorCount = 25;
+	private static final int offspringCount = 75;
+	private static final int maxAge = 1000000;
 	private static final Selector<IntegerGene, Integer> survivorSelector =
-			null;
+			new TournamentSelector<>(3);
 	private static final Selector<IntegerGene, Integer> offspringSelector =
-			null;
-	private static final Alterer<IntegerGene, Integer> alterer =
-			null;
-	private static final Predicate<EvolutionResult<IntegerGene, Integer>> limitPredicate =
-			null;
+			new TournamentSelector<>(3);
+	private static final Alterer<IntegerGene, Integer> alterer = Alterer.of(
+				new UniformCrossover<>(0.5, 0.5),
+				new GaussianMutator<IntegerGene, Integer>(0.2)
+			);
 	
-	public DeckBuilderEngine(final ISeq<MagicCardDefinition> cardPool) {
+	public DeckBuilderEngine(final List<MagicCardDefinition> cardPool) {
 		this.cardPool = cardPool;
 		this.cardPoolSize = cardPool.size();
 		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
@@ -65,7 +69,7 @@ public final class DeckBuilderEngine {
 		return EvolutionStream.of(
 				() -> this.start(populationSize, 0),
 				this::evolve)
-				.limit(limitPredicate)
+				.limit(Limits.bySteadyFitness(10))
 				.collect(EvolutionResult.toBestEvolutionResult());
 	}
 	
@@ -98,7 +102,6 @@ public final class DeckBuilderEngine {
 		final ISeq<Phenotype<IntegerGene, Integer>> alteredOffsprings = alterResult.getPopulation();
 		final int alterCount = alterResult.getAlterations();
 
-		// TODO kill old individuals
 		final ISeq<Phenotype<IntegerGene, Integer>> nextPopulation = ISeq.empty();
 		nextPopulation.append(survivors);
 		nextPopulation.append(alteredOffsprings);
