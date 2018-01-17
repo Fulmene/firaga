@@ -17,7 +17,7 @@
 
 package firaga.magic;
 
-public class MagicConstants {
+public final class MagicConstants {
 
 	public static final int MIN_DECK_SIZE = 60;
 	public static final int MAX_COPIES = 4;

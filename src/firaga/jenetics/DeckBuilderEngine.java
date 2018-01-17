@@ -27,9 +27,8 @@ import io.jenetics.engine.EvolutionStart;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
 
-public class DeckBuilderEngine {
+public final class DeckBuilderEngine {
 	
-	// TODO max number
 	private final Factory<Genotype<IntegerGene>> GTF;
 	private final int cardPoolSize;
 	
