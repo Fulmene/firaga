@@ -19,6 +19,9 @@ package firaga.jenetics;
 
 import java.util.List;
 
+import firaga.magic.MagicDeckCreator;
+import firaga.magic.land.BasicLandGenerator;
+import firaga.magic.land.LandGenerator;
 import io.jenetics.Alterer;
 import io.jenetics.AltererResult;
 import io.jenetics.GaussianMutator;
@@ -37,19 +40,21 @@ import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
 import magic.model.MagicCardDefinition;
+import magic.model.MagicDeck;
 
 public final class DeckBuilderEngine {
 	
+	// Magic related parameters
 	private final List<MagicCardDefinition> cardPool;
 	private final int cardPoolSize;
-	private final Factory<Genotype<IntegerGene>> GTF;
+	private final LandGenerator landGenerator;
 	
 	// Genetic algorithm parameters
+	private final Factory<Genotype<IntegerGene>> GTF;
 	private final int populationSize;
 	private final double survivorFraction;
 	private final int survivorCount;
 	private final int offspringCount;
-	//private static final int maxAge = 1000000;
 	private final Selector<IntegerGene, Integer> survivorSelector;
 	private final Selector<IntegerGene, Integer> offspringSelector;
 	private final Alterer<IntegerGene, Integer> alterer;
@@ -57,8 +62,9 @@ public final class DeckBuilderEngine {
 	public DeckBuilderEngine(final List<MagicCardDefinition> cardPool) {
 		this.cardPool = cardPool;
 		this.cardPoolSize = cardPool.size();
-		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
+		this.landGenerator = BasicLandGenerator.getInstance();
 
+		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
 		this.populationSize = 100;
 		this.survivorFraction = 0.25;
 		this.survivorCount = (int)(populationSize * survivorFraction);
@@ -101,6 +107,11 @@ public final class DeckBuilderEngine {
 	evolve(final EvolutionStart<IntegerGene, Integer> start) {
 		final ISeq<Phenotype<IntegerGene, Integer>> population = start.getPopulation();
 		final long generation = start.getGeneration();
+		
+		final ISeq<MagicDeck> decks = population.stream()
+				.map(pt -> MagicDeckCreator.getMagicDeck(this.cardPool, pt, landGenerator))
+				.collect(ISeq.toISeq());
+		// TODO run games
 
 		final ISeq<Phenotype<IntegerGene, Integer>> offsprings = offspringSelector.select(population, offspringCount, Optimize.MAXIMUM);
 		final ISeq<Phenotype<IntegerGene, Integer>> survivors = survivorSelector.select(population, survivorCount, Optimize.MAXIMUM);
@@ -125,8 +136,6 @@ public final class DeckBuilderEngine {
 		
 		filteredNextPopulation.append(replacementPopulation);
 				
-		// TODO create deck
-		// TODO Play games and save results to file
 		return EvolutionResult.of(
 				Optimize.MAXIMUM,
 				filteredNextPopulation,
