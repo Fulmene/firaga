@@ -22,18 +22,18 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import firaga.magic.land.LandGenerator;
+import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
-import io.jenetics.Phenotype;
 import magic.data.DeckType;
 import magic.model.MagicCardDefinition;
 import magic.model.MagicDeck;
 
 public final class MagicDeckCreator {
 	
-	public static final MagicDeck getMagicDeck(final List<MagicCardDefinition> cardPool, final Phenotype<IntegerGene, Integer> phenotype, final LandGenerator landGenerator) {
+	public static final MagicDeck getMagicDeck(final List<MagicCardDefinition> cardPool, final Genotype<IntegerGene> genotype, final LandGenerator landGenerator) {
 		final MagicDeck deck = new MagicDeck();
 		IntStream.range(0, cardPool.size())
-			.forEach(i -> deck.addAll(Collections.nCopies(phenotype.getGenotype().get(0, i).intValue(), cardPool.get(i))));
+			.forEach(i -> deck.addAll(Collections.nCopies(genotype.get(0, i).intValue(), cardPool.get(i))));
 		deck.setDeckType(DeckType.Custom);
 		landGenerator.addLands(deck);
 		return deck;
