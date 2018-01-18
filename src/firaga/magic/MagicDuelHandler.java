@@ -17,12 +17,7 @@
 
 package firaga.magic;
 
-import java.nio.file.Paths;
-
-import firaga.magic.land.BasicLandGenerator;
 import magic.ai.MagicAIImpl;
-import magic.data.CardDefinitions;
-import magic.data.DeckType;
 import magic.data.DuelConfig;
 import magic.headless.HeadlessGameController;
 import magic.model.DuelPlayerConfig;
@@ -30,13 +25,10 @@ import magic.model.MagicDeck;
 import magic.model.MagicDuel;
 import magic.model.MagicGame;
 import magic.model.player.AiProfile;
-import magic.utility.DeckUtils;
-import magic.utility.MagicSystem;
-import magic.utility.ProgressReporter;
 
 public final class MagicDuelHandler {
 	
-	private static final int NR_OF_GAMES = 1;
+	private static final int NR_OF_GAMES = 10;
 	
 	private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTSC;
 	private static final int AI_LEVEL = 4;
@@ -60,12 +52,14 @@ public final class MagicDuelHandler {
 		duel.setPlayers(players);
 		
 		while (duel.getGamesPlayed() < duel.getGamesTotal()) {
+			long startTime = System.nanoTime();
 			System.out.println("Start game " + (duel.getGamesPlayed() + 1));
 			final MagicGame game = duel.nextGame();
 			game.setArtificial(true);
 			final HeadlessGameController controller = new HeadlessGameController(game, 600000);
 			controller.runGame();
 			System.out.println("End game " + duel.getGamesPlayed());
+			System.out.println("Time: " + (System.nanoTime() - startTime) / 1000000000L);
 		}
 
 		System.out.println(
@@ -80,23 +74,6 @@ public final class MagicDuelHandler {
 						(duel.getGamesPlayed() - duel.getGamesWon())
 				);
 		return duel.getGamesWon(); // TODO add more statistics
-	}
-	
-	// Test
-	public static final void main(final String[] args) {
-		ProgressReporter reporter = new ProgressReporter();
-		MagicSystem.initialize(reporter);
-		final MagicDeck deck1 = new MagicDeck();
-		final MagicDeck deck2 = new MagicDeck();
-		deck1.add(CardDefinitions.getCard("Hazoret the Fervent"));
-		deck2.add(CardDefinitions.getCard("Hazoret the Fervent"));
-		deck1.setDeckType(DeckType.Custom);
-		deck2.setDeckType(DeckType.Custom);
-		BasicLandGenerator.getInstance().addLands(deck1);
-		BasicLandGenerator.getInstance().addLands(deck2);
-		//final MagicDeck deck1 = DeckUtils.loadDeckFromFile(Paths.get(DeckUtils.findDeckFile("FX_Rat.dec").toURI()));
-		//final MagicDeck deck2 = DeckUtils.loadDeckFromFile(Paths.get(DeckUtils.findDeckFile("FX_Reanimator.dec").toURI()));
-		getDuelScore(deck1, deck2);
 	}
 
 }
