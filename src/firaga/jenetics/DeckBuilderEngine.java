@@ -47,8 +47,8 @@ import magic.model.MagicDeck;
 public final class DeckBuilderEngine {
 	
 	// Magic related parameters
-	private final List<MagicCardDefinition> cardPool;
-	private final int cardPoolSize;
+	private final List<MagicCardDefinition> spellPool;
+	private final int spellPoolSize;
 	private final LandGenerator landGenerator;
 	private final MagicDeck[] opponentDecks;
 	
@@ -63,12 +63,12 @@ public final class DeckBuilderEngine {
 	private final Alterer<IntegerGene, Integer> alterer;
 	
 	public DeckBuilderEngine(final List<MagicCardDefinition> cardPool) {
-		this.cardPool = cardPool;
-		this.cardPoolSize = cardPool.size();
+		this.spellPool = cardPool;
+		this.spellPoolSize = cardPool.size();
 		this.landGenerator = BasicLandGenerator.getInstance();
 		this.opponentDecks = new MagicDeck[0];
 
-		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
+		this.GTF = Genotype.of(DeckChromosome.of(spellPoolSize));
 		this.populationSize = 100;
 		this.survivorFraction = 0.25;
 		this.survivorCount = (int)(populationSize * survivorFraction);
@@ -91,7 +91,7 @@ public final class DeckBuilderEngine {
 	}
 	
 	private final Integer fitness(final Genotype<IntegerGene> gt) {
-		MagicDeck deck = MagicDeckCreator.getMagicDeck(this.cardPool, gt, this.landGenerator);
+		MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
 		return Arrays.stream(opponentDecks).map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
 	}
 	
