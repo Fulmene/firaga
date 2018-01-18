@@ -1,0 +1,4 @@
+[submodule "lib/magarena"]
+	path = lib/magarena
+	url = git@github.com:Fulmene/magarena
+	branch = firaga
