@@ -41,7 +41,7 @@ public final class MagicDuelHandler {
 	private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTSC;
 	private static final int AI_LEVEL = 4;
 
-	public static void runDuel(final MagicDeck... decks) {
+	public static Integer getDuelScore(final MagicDeck... decks) {
 		
 		if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.runDuel only accepts 2 decks");
 		if (decks[0] == null || decks[1] == null) throw new NullPointerException();
@@ -79,6 +79,7 @@ public final class MagicDuelHandler {
 						duel.getGamesWon() + "\t" +
 						(duel.getGamesPlayed() - duel.getGamesWon())
 				);
+		return duel.getGamesWon(); // TODO add more statistics
 	}
 	
 	// Test
@@ -95,7 +96,7 @@ public final class MagicDuelHandler {
 		BasicLandGenerator.getInstance().addLands(deck2);
 		//final MagicDeck deck1 = DeckUtils.loadDeckFromFile(Paths.get(DeckUtils.findDeckFile("FX_Rat.dec").toURI()));
 		//final MagicDeck deck2 = DeckUtils.loadDeckFromFile(Paths.get(DeckUtils.findDeckFile("FX_Reanimator.dec").toURI()));
-		runDuel(deck1, deck2);
+		getDuelScore(deck1, deck2);
 	}
 
 }
