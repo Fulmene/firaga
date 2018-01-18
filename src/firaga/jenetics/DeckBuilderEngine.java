@@ -17,9 +17,11 @@
 
 package firaga.jenetics;
 
+import java.util.Arrays;
 import java.util.List;
 
 import firaga.magic.MagicDeckCreator;
+import firaga.magic.MagicDuelHandler;
 import firaga.magic.land.BasicLandGenerator;
 import firaga.magic.land.LandGenerator;
 import io.jenetics.Alterer;
@@ -48,6 +50,7 @@ public final class DeckBuilderEngine {
 	private final List<MagicCardDefinition> cardPool;
 	private final int cardPoolSize;
 	private final LandGenerator landGenerator;
+	private final MagicDeck[] opponentDecks;
 	
 	// Genetic algorithm parameters
 	private final Factory<Genotype<IntegerGene>> GTF;
@@ -63,6 +66,7 @@ public final class DeckBuilderEngine {
 		this.cardPool = cardPool;
 		this.cardPoolSize = cardPool.size();
 		this.landGenerator = BasicLandGenerator.getInstance();
+		this.opponentDecks = new MagicDeck[0];
 
 		this.GTF = Genotype.of(DeckChromosome.of(cardPoolSize));
 		this.populationSize = 100;
@@ -86,18 +90,16 @@ public final class DeckBuilderEngine {
 				.collect(EvolutionResult.toBestEvolutionResult());
 	}
 	
-	private static final Integer fitness(final Genotype<IntegerGene> gt) {
-		// TODO stub
-		// Fitness value will already be saved in a file,
-		// so just read it.
-		return 0;
+	private final Integer fitness(final Genotype<IntegerGene> gt) {
+		MagicDeck deck = MagicDeckCreator.getMagicDeck(this.cardPool, gt, this.landGenerator);
+		return Arrays.stream(opponentDecks).map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
 	}
 	
 	private final EvolutionStart<IntegerGene, Integer>
 	start(final int populationSize, final long generation) {
 		final ISeq<Phenotype<IntegerGene, Integer>> population =
 				GTF.instances()
-					.map(gt -> Phenotype.of(gt, generation, DeckBuilderEngine::fitness))
+					.map(gt -> Phenotype.of(gt, generation, this::fitness))
 					.limit(populationSize)
 					.collect(ISeq.toISeq());
 		return EvolutionStart.of(population, generation);
@@ -107,11 +109,6 @@ public final class DeckBuilderEngine {
 	evolve(final EvolutionStart<IntegerGene, Integer> start) {
 		final ISeq<Phenotype<IntegerGene, Integer>> population = start.getPopulation();
 		final long generation = start.getGeneration();
-		
-		final ISeq<MagicDeck> decks = population.stream()
-				.map(pt -> MagicDeckCreator.getMagicDeck(this.cardPool, pt, landGenerator))
-				.collect(ISeq.toISeq());
-		// TODO run games
 
 		final ISeq<Phenotype<IntegerGene, Integer>> offsprings = offspringSelector.select(population, offspringCount, Optimize.MAXIMUM);
 		final ISeq<Phenotype<IntegerGene, Integer>> survivors = survivorSelector.select(population, survivorCount, Optimize.MAXIMUM);
@@ -130,7 +127,7 @@ public final class DeckBuilderEngine {
 		final int invalidCount = nextPopulation.size() - filteredNextPopulation.size();
 	
 		final ISeq<Phenotype<IntegerGene, Integer>> replacementPopulation = GTF.instances()
-				.map(gt -> Phenotype.of(gt, generation, DeckBuilderEngine::fitness))
+				.map(gt -> Phenotype.of(gt, generation, this::fitness))
 				.limit(populationSize - nextPopulation.size())
 				.collect(ISeq.toISeq());
 		
