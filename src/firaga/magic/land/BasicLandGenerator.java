@@ -56,13 +56,18 @@ public final class BasicLandGenerator implements LandGenerator {
 						deck.stream().mapToInt(c -> c.getCost().getDevotion(color)).sum()))
 				.toArray(ColorCount[]::new);
 		final int allColors = Arrays.stream(colorCounts).mapToInt(cc -> cc.count).sum();
-		
 		final int landCount = MagicConstants.MIN_DECK_SIZE - deck.size();
-		Arrays.stream(colorCounts).forEach(cc ->
+
+		if (allColors != 0) {
+			Arrays.stream(colorCounts).forEach(cc ->
 			deck.addAll(Collections.nCopies(cc.count * landCount / allColors, CardDefinitions.getBasicLand(cc.color))));
-		Arrays.stream(colorCounts)
-			.min((cc1, cc2) -> Integer.compare(cc1.count, cc2.count))
-			.ifPresent(cc -> deck.addAll(Collections.nCopies(Math.max(landCount - deck.size(), 0), CardDefinitions.getBasicLand(cc.color))));
+			Arrays.stream(colorCounts)
+				.min((cc1, cc2) -> Integer.compare(cc1.count, cc2.count))
+				.ifPresent(cc -> deck.addAll(Collections.nCopies(Math.max(landCount - deck.size(), 0), CardDefinitions.getBasicLand(cc.color))));
+		}
+		else {
+			deck.addAll(Collections.nCopies(landCount, CardDefinitions.getBasicLand(MagicColor.White)));
+		}
 	}
 
 }
