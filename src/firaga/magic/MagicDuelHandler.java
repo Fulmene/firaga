@@ -52,14 +52,10 @@ public final class MagicDuelHandler {
 		duel.setPlayers(players);
 		
 		while (duel.getGamesPlayed() < duel.getGamesTotal()) {
-			long startTime = System.nanoTime();
-			System.out.println("Start game " + (duel.getGamesPlayed() + 1));
 			final MagicGame game = duel.nextGame();
 			game.setArtificial(true);
 			final HeadlessGameController controller = new HeadlessGameController(game, 600000);
 			controller.runGame();
-			System.out.println("End game " + duel.getGamesPlayed());
-			System.out.println("Time: " + (System.nanoTime() - startTime) / 1000000000L);
 		}
 
 		return duel.getGamesWon(); // TODO add more statistics
