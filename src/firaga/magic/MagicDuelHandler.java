@@ -30,8 +30,8 @@ public final class MagicDuelHandler {
 	
 	private static final int NR_OF_GAMES = 10;
 	
-	private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTSC;
-	private static final int AI_LEVEL = 4;
+	private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTS;
+	private static final int AI_LEVEL = 1;
 
 	public static Integer getDuelScore(final MagicDeck... decks) {
 		
@@ -62,17 +62,6 @@ public final class MagicDuelHandler {
 			System.out.println("Time: " + (System.nanoTime() - startTime) / 1000000000L);
 		}
 
-		System.out.println(
-						decks[0] + "\t" +
-						AI_TYPE + "\t" +
-						AI_LEVEL + "\t" +
-						decks[1] + "\t" +
-						AI_TYPE + "\t" +
-						AI_LEVEL + "\t" +
-						duel.getGamesTotal() + "\t" +
-						duel.getGamesWon() + "\t" +
-						(duel.getGamesPlayed() - duel.getGamesWon())
-				);
 		return duel.getGamesWon(); // TODO add more statistics
 	}
 
