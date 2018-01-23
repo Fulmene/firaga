@@ -17,26 +17,30 @@
 
 package firaga.jenetics;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import firaga.magic.MagicDeckCreator;
 import firaga.magic.MagicDuelHandler;
-import firaga.magic.land.BasicLandGenerator;
 import firaga.magic.land.LandGenerator;
-import io.jenetics.Alterer;
+import firaga.magic.land.LandPool;
 import io.jenetics.GaussianMutator;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerGene;
-import io.jenetics.Selector;
 import io.jenetics.TournamentSelector;
 import io.jenetics.UniformCrossover;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
+import magic.data.CardDefinitions;
+import magic.data.MagicFormat;
 import magic.model.MagicCardDefinition;
+import magic.model.MagicColor;
 import magic.model.MagicDeck;
 import magic.utility.DeckUtils;
 
@@ -46,54 +50,60 @@ public final class DeckBuilderEngine {
 	private final List<MagicCardDefinition> spellPool;
 	private final int spellPoolSize;
 	private final LandGenerator landGenerator;
-	private final MagicDeck[] opponentDecks;
+	private final MagicDeck[] benchmarkDecks;
 	
 	// Genetic algorithm parameters
-	private final Factory<Genotype<IntegerGene>> GTF;
-	private final int populationSize;
-	private final double survivorFraction;
-	private final Selector<IntegerGene, Integer> survivorSelector;
-	private final Selector<IntegerGene, Integer> offspringSelector;
-	private final Alterer<IntegerGene, Integer> alterer;
+	private static final Engine.Builder<IntegerGene, Integer> DEFAULT_ENGINE_BUILDER =
+			Engine.builder(gt -> 0, DeckChromosome.of(0))
+				.maximizing()
+				.populationSize(40)
+				.survivorsFraction(0.25)
+				.survivorsSelector(new TournamentSelector<>(3))
+				.offspringSelector(new TournamentSelector<>(3))
+				.alterers(
+						new UniformCrossover<>(0.5, 0.5),
+						new GaussianMutator<>(0.2));
+
+	private final Engine<IntegerGene, Integer> engine;
+	private final Factory<Genotype<IntegerGene>> gtf;
 	
-	public DeckBuilderEngine(final List<MagicCardDefinition> spellPool) {
-		this.spellPool = spellPool;
-		this.spellPoolSize = spellPool.size();
-		this.landGenerator = BasicLandGenerator.getInstance();
-		this.GTF = Genotype.of(DeckChromosome.of(spellPoolSize));
+	public DeckBuilderEngine(final MagicFormat format, final MagicColor... colors) {
+		this(format, DEFAULT_ENGINE_BUILDER, colors);
+	}
 
-		this.opponentDecks = Stream.of("Benchmark_RamunapRed", "Benchmark_TemurEnergy")
-				.map(name -> DeckUtils.loadDeckFromFile(DeckUtils.findDeckFile(name).toPath()))
-				.toArray(MagicDeck[]::new);
-
-		this.populationSize = 100;
-		this.survivorFraction = 0.25;
+	public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final MagicColor... colors) {
+		final int colorMask = Arrays.stream(colors).map(c -> c.getMask()).reduce(0, (c1, c2) -> c1|c2);
+		this.spellPool = CardDefinitions.getSpellCards().stream()
+				.filter(format::isCardLegal)
+				.filter(card -> (card.getColorFlags() | colorMask) == colorMask)
+				.collect(Collectors.toList());
+		this.spellPoolSize = this.spellPool.size();
+		this.landGenerator = new LandPool(format, colors);
 		
-		this.survivorSelector = new TournamentSelector<>(3);
-		this.offspringSelector = new TournamentSelector<>(3);
-		this.alterer = Alterer.of(
-				new UniformCrossover<>(0.5, 0.5),
-				new GaussianMutator<IntegerGene, Integer>(0.2));
+		try {
+			this.benchmarkDecks = Files.walk(Paths.get("resources/benchmark-decks/" + format.getName()))
+					.filter(Files::isRegularFile)
+					.map(DeckUtils::loadDeckFromFile)
+					.toArray(MagicDeck[]::new);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		this.gtf = Genotype.of(DeckChromosome.of(this.spellPoolSize));
+		this.engine = engineBuilder.copy()
+				.fitnessFunction(this::fitness)
+				.genotypeFactory(this.gtf)
+				.build();
 	}
 	
 	public final Genotype<IntegerGene>
 	run() {
-		Engine<IntegerGene, Integer> engine =
-				Engine.builder(this::fitness, this.GTF)
-					.populationSize(populationSize)
-					.maximizing()
-					.survivorsFraction(survivorFraction)
-					.survivorsSelector(survivorSelector)
-					.offspringSelector(offspringSelector)
-					.alterers(alterer)
-					.executor(Executors.newFixedThreadPool(2))
-					.build();
-		return engine.stream().limit(3).collect(EvolutionResult.toBestGenotype());
+		return this.engine.stream().limit(Limits.bySteadyFitness(10)).collect(EvolutionResult.toBestGenotype());
 	}
 	
 	private final Integer fitness(final Genotype<IntegerGene> gt) {
 		MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
-		return Arrays.stream(opponentDecks).map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
+		return Arrays.stream(benchmarkDecks).parallel().map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
 	}
 	
 }
