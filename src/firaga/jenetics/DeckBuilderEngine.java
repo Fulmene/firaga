@@ -34,8 +34,7 @@ import io.jenetics.IntegerGene;
 import io.jenetics.TournamentSelector;
 import io.jenetics.UniformCrossover;
 import io.jenetics.engine.Engine;
-import io.jenetics.engine.EvolutionResult;
-import io.jenetics.engine.Limits;
+import io.jenetics.engine.EvolutionStream;
 import io.jenetics.util.Factory;
 import magic.data.CardDefinitions;
 import magic.data.MagicFormat;
@@ -96,9 +95,9 @@ public final class DeckBuilderEngine {
 				.build();
 	}
 	
-	public final Genotype<IntegerGene>
-	run() {
-		return this.engine.stream().limit(Limits.bySteadyFitness(10)).collect(EvolutionResult.toBestGenotype());
+	public final EvolutionStream<IntegerGene, Integer>
+	stream() {
+		return this.engine.stream();
 	}
 	
 	private final Integer fitness(final Genotype<IntegerGene> gt) {
