@@ -12,7 +12,7 @@ import magic.model.MagicDeck;
 
 public class LandPool implements LandGenerator {
 	
-	private final List<MagicCardDefinition> lands;
+	protected final List<MagicCardDefinition> lands;
 
 	public LandPool(MagicFormat format, MagicColor... colors) {
 		lands = CardDefinitions.getNonBasicLandCards()
