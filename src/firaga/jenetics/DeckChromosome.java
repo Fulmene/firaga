@@ -19,76 +19,61 @@ package firaga.jenetics;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import firaga.magic.MagicConstants;
-import io.jenetics.Chromosome;
+import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
-import io.jenetics.NumericChromosome;
 import io.jenetics.util.ISeq;
+import io.jenetics.util.IntRange;
 import io.jenetics.util.RandomRegistry;
 
-public final class DeckChromosome implements NumericChromosome<Integer, IntegerGene> {
+public class DeckChromosome extends IntegerChromosome {
 
-	private final int cardPoolSize;
-	private final ISeq<IntegerGene> genes;
+	private static final long serialVersionUID = 1L;
 
 	private static final IntegerGene GENE_PROTOTYPE = IntegerGene.of(0, MagicConstants.MAX_COPIES);
 
+	protected final ISeq<IntegerGene> empty;
+	protected final int cardPoolSize;
+
 	public DeckChromosome(final int cardPoolSize) {
+		super(0, MagicConstants.MAX_COPIES, cardPoolSize);
+		empty = ISeq.of(Collections.nCopies(cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
 		this.cardPoolSize = cardPoolSize;
-		this.genes = null;
 	}
 	
 	private DeckChromosome(final ISeq<IntegerGene> genes, final int cardPoolSize) {
+		super(genes, IntRange.of(0, cardPoolSize));
+		empty = ISeq.of(Collections.nCopies(cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
 		this.cardPoolSize = cardPoolSize;
-		this.genes = genes;
-	}
-	
-	@Override
-	public final IntegerGene getGene(int index) {
-		return genes.get(index);
 	}
 
 	@Override
 	public final int length() {
-		return cardPoolSize;
+		return this.cardPoolSize;
 	}
 
 	@Override
-	public final Chromosome<IntegerGene> newInstance(ISeq<IntegerGene> genes) {
+	public final IntegerChromosome newInstance(ISeq<IntegerGene> genes) {
 		return new DeckChromosome(validateDeckSize(genes), this.cardPoolSize);
 	}
 
 	@Override
-	public final ISeq<IntegerGene> toSeq() {
-		return this.genes;
-	}
-
-	@Override
-	public final boolean isValid() {
-		final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
-		return spellCount >= MagicConstants.MIN_SPELLS && spellCount <= MagicConstants.MAX_SPELLS;
-	}
-
-	@Override
-	public final Iterator<IntegerGene> iterator() {
-		return genes.iterator();
-	}
-
-	@Override
-	public final Chromosome<IntegerGene> newInstance() {
-		ISeq<IntegerGene> emptyGenes = ISeq.of(Collections.nCopies(this.cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
+	public IntegerChromosome newInstance() {
 		final int targetSpellCount = MagicConstants.MIN_SPELLS + RandomRegistry.getRandom().nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
-		ISeq<IntegerGene> genes = addCards(emptyGenes, targetSpellCount, true);
-		return new DeckChromosome(genes, this.cardPoolSize);
+		final ISeq<IntegerGene> genes = addCards(this.empty, targetSpellCount, true);
+		return new DeckChromosome(genes, genes.size());
 	}
 	
-	public static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
+	public static final DeckChromosome of(final int cardPoolSize) {
+		return new DeckChromosome(cardPoolSize);
+	}
+	
+	private static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
 		final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
 		final Random random = RandomRegistry.getRandom();
 		if (spellCount < MagicConstants.MIN_SPELLS) {
@@ -103,10 +88,6 @@ public final class DeckChromosome implements NumericChromosome<Integer, IntegerG
 		else {
 			return genes;
 		}
-	}
-	
-	public static final DeckChromosome of(final int cardPoolSize) {
-		return new DeckChromosome(cardPoolSize);
 	}
 	
 	private static final ISeq<IntegerGene> addCards(final ISeq<IntegerGene> genes, final int targetSpellCount, final boolean useNewCards) {
