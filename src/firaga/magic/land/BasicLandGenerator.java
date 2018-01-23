@@ -66,6 +66,7 @@ public final class BasicLandGenerator implements LandGenerator {
 				.ifPresent(cc -> deck.addAll(Collections.nCopies(Math.max(landCount - deck.size(), 0), CardDefinitions.getBasicLand(cc.color))));
 		}
 		else {
+			// Use Plains for colourless decks
 			deck.addAll(Collections.nCopies(landCount, CardDefinitions.getBasicLand(MagicColor.White)));
 		}
 	}
