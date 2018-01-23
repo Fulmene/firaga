@@ -8,6 +8,6 @@
 			<attribute name="javadoc_location" value="file:/home/fulmene/Documents/chula/senior-project/code/firaga/lib/jenetics/javadoc/jenetics/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/fulmene/Documents/chula/senior-project/code/firaga/lib/magarena/release/Magarena.jar"/>
+	<classpathentry kind="lib" path="lib/magarena/release/Magarena.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
