@@ -100,6 +100,14 @@ public final class DeckBuilderEngine {
 		return this.engine.stream();
 	}
 	
+	public final List<MagicCardDefinition> getSpellPool() {
+		return this.spellPool;
+	}
+	
+	public final LandGenerator getLandGenerator() {
+		return this.landGenerator;
+	}
+	
 	private final Integer fitness(final Genotype<IntegerGene> gt) {
 		MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
 		return Arrays.stream(benchmarkDecks).parallel().map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
