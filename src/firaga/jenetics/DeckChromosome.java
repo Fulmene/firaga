@@ -38,28 +38,28 @@ public class DeckChromosome extends IntegerChromosome {
 	private static final IntegerGene GENE_PROTOTYPE = IntegerGene.of(0, MagicConstants.MAX_COPIES);
 
 	protected final ISeq<IntegerGene> empty;
-	protected final int cardPoolSize;
+	protected final int spellPoolSize;
 
-	public DeckChromosome(final int cardPoolSize) {
-		super(0, MagicConstants.MAX_COPIES, cardPoolSize);
-		empty = ISeq.of(Collections.nCopies(cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
-		this.cardPoolSize = cardPoolSize;
+	public DeckChromosome(final int spellPoolSize) {
+		super(0, MagicConstants.MAX_COPIES, spellPoolSize);
+		empty = ISeq.of(Collections.nCopies(spellPoolSize, GENE_PROTOTYPE.newInstance(0)));
+		this.spellPoolSize = spellPoolSize;
 	}
 	
-	private DeckChromosome(final ISeq<IntegerGene> genes, final int cardPoolSize) {
-		super(genes, IntRange.of(0, cardPoolSize));
-		empty = ISeq.of(Collections.nCopies(cardPoolSize, GENE_PROTOTYPE.newInstance(0)));
-		this.cardPoolSize = cardPoolSize;
+	private DeckChromosome(final ISeq<IntegerGene> genes, final int spellPoolSize) {
+		super(genes, IntRange.of(0, spellPoolSize));
+		empty = ISeq.of(Collections.nCopies(spellPoolSize, GENE_PROTOTYPE.newInstance(0)));
+		this.spellPoolSize = spellPoolSize;
 	}
 
 	@Override
 	public final int length() {
-		return this.cardPoolSize;
+		return this.spellPoolSize;
 	}
 
 	@Override
 	public final IntegerChromosome newInstance(ISeq<IntegerGene> genes) {
-		return new DeckChromosome(validateDeckSize(genes), this.cardPoolSize);
+		return new DeckChromosome(validateDeckSize(genes), this.spellPoolSize);
 	}
 
 	@Override
@@ -69,8 +69,8 @@ public class DeckChromosome extends IntegerChromosome {
 		return new DeckChromosome(genes, genes.size());
 	}
 	
-	public static final DeckChromosome of(final int cardPoolSize) {
-		return new DeckChromosome(cardPoolSize);
+	public static final DeckChromosome of(final int spellPoolSize) {
+		return new DeckChromosome(spellPoolSize);
 	}
 	
 	private static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
@@ -94,10 +94,10 @@ public class DeckChromosome extends IntegerChromosome {
 		final int[] newGenes = genes.stream().mapToInt(g -> g.intValue()).toArray();
 		int spellCount = Arrays.stream(newGenes).sum();
 
-		final int cardPoolSize = genes.size();
+		final int spellPoolSize = genes.size();
 		final Random random = RandomRegistry.getRandom();
 
-		List<Integer> availableCards = IntStream.range(0, cardPoolSize)
+		List<Integer> availableCards = IntStream.range(0, spellPoolSize)
 				.filter(n -> {
 					return (useNewCards || newGenes[n] > 0) && newGenes[n] < MagicConstants.MAX_COPIES; })
 				.boxed()
@@ -109,7 +109,7 @@ public class DeckChromosome extends IntegerChromosome {
 			// it means useNewCards is false, but all available cards are maxed.
 			// So, add unused cards to availableCards.
 			if (availableCards.isEmpty()) {
-				IntStream.range(0, cardPoolSize)
+				IntStream.range(0, spellPoolSize)
 					.filter(n -> newGenes[n] == 0)
 					.forEachOrdered(availableCards::add);
 			}
@@ -129,10 +129,10 @@ public class DeckChromosome extends IntegerChromosome {
 		final int[] newGenes = genes.stream().mapToInt(g -> g.intValue()).toArray();
 		int spellCount = Arrays.stream(newGenes).sum();
 
-		final int cardPoolSize = genes.size();
+		final int spellPoolSize = genes.size();
 		final Random random = RandomRegistry.getRandom();
 
-		List<Integer> availableCards = IntStream.range(0, cardPoolSize)
+		List<Integer> availableCards = IntStream.range(0, spellPoolSize)
 				.filter(n -> newGenes[n] > 0)
 				.boxed()
 				.collect(Collectors.toList());
