@@ -27,10 +27,12 @@ public final class CmdLineArgs {
 	
 	final MagicFormat format;
 	final MagicColor[] colors;
+	final String saveDir;
 
 	public CmdLineArgs(final String[] args) {
 		String formatString = null;
 		String colorString = null;
+		String saveDirString = null;
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("--format") || args[i].equals("-f")) {
 				if (formatString == null)
@@ -44,6 +46,12 @@ public final class CmdLineArgs {
 				else
 					throw new IllegalArgumentException("Color specified more than once");
 			}
+			else if (args[i].equals("--savedir") || args[i].equals("-d")) {
+				if (saveDirString == null)
+					saveDirString = args[++i];
+				else
+					throw new IllegalArgumentException("Save directory specified more than once");
+			}
 			else {
 				throw new IllegalArgumentException("Unknown argument: " + args[i]);
 			}
@@ -51,6 +59,7 @@ public final class CmdLineArgs {
 
 		this.format = parseFormat(formatString.trim());
 		this.colors = parseColors(colorString.trim());
+		this.saveDir = saveDirString;
 	}
 	
 	public final MagicFormat getFormat() {
@@ -59,6 +68,10 @@ public final class CmdLineArgs {
 
 	public final MagicColor[] getColors() {
 		return this.colors;
+	}
+
+	public final String getSaveDir() {
+		return this.saveDir;
 	}
 	
 	private static final MagicFormat parseFormat(final String formatString) {
