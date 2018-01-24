@@ -47,7 +47,7 @@ public class DeckChromosome extends IntegerChromosome {
 	}
 	
 	private DeckChromosome(final ISeq<IntegerGene> genes, final int spellPoolSize) {
-		super(genes, IntRange.of(0, spellPoolSize));
+		super(genes, IntRange.of(spellPoolSize));
 		empty = ISeq.of(Collections.nCopies(spellPoolSize, GENE_PROTOTYPE.newInstance(0)));
 		this.spellPoolSize = spellPoolSize;
 	}
@@ -64,8 +64,7 @@ public class DeckChromosome extends IntegerChromosome {
 
 	@Override
 	public IntegerChromosome newInstance() {
-		final int targetSpellCount = MagicConstants.MIN_SPELLS + RandomRegistry.getRandom().nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
-		final ISeq<IntegerGene> genes = addCards(this.empty, targetSpellCount, true);
+		final ISeq<IntegerGene> genes = addCards(this.empty, getRandomSpellCount(), true);
 		return new DeckChromosome(genes, genes.size());
 	}
 	
@@ -75,15 +74,12 @@ public class DeckChromosome extends IntegerChromosome {
 	
 	private static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
 		final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
-		final Random random = RandomRegistry.getRandom();
 		if (spellCount < MagicConstants.MIN_SPELLS) {
-			final int targetSpellCount = MagicConstants.MIN_SPELLS + random.nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
-			final boolean useNewCards = random.nextBoolean();
-			return addCards(genes, targetSpellCount, useNewCards);
+			final boolean useNewCards = RandomRegistry.getRandom().nextBoolean();
+			return addCards(genes, getRandomSpellCount(), useNewCards);
 		}
 		else if (spellCount > MagicConstants.MAX_SPELLS) {
-			final int targetSpellCount = MagicConstants.MIN_SPELLS + random.nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
-			return removeCards(genes, targetSpellCount);
+			return removeCards(genes, getRandomSpellCount());
 		}
 		else {
 			return genes;
@@ -137,7 +133,7 @@ public class DeckChromosome extends IntegerChromosome {
 				.boxed()
 				.collect(Collectors.toList());
 
-		while (spellCount < targetSpellCount) {
+		while (spellCount > targetSpellCount) {
 			final int selectedIndex = random.nextInt(availableCards.size());
 			final int selected = availableCards.get(selectedIndex);
 			newGenes[selected]--;
@@ -147,6 +143,10 @@ public class DeckChromosome extends IntegerChromosome {
 		}
 	
 		return Arrays.stream(newGenes).boxed().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
+	}
+
+	private static int getRandomSpellCount() {
+		return MagicConstants.MIN_SPELLS + RandomRegistry.getRandom().nextInt(MagicConstants.MAX_SPELLS - MagicConstants.MIN_SPELLS + 1);
 	}
 
 }
