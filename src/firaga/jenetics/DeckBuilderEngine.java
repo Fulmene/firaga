@@ -56,7 +56,7 @@ public final class DeckBuilderEngine {
 	private final int spellPoolSize;
 	private final LandGenerator landGenerator;
 	private final MagicDeck[] benchmarkDecks;
-	private final String savePath;
+	private final String saveDir;
 	
 	// Genetic algorithm parameters
 	public static final Engine.Builder<IntegerGene, Integer> DEFAULT_ENGINE_BUILDER =
@@ -113,7 +113,7 @@ public final class DeckBuilderEngine {
 		Arrays.stream(colors).sequential().forEach(c -> 
 			savePathBuilder.append(c.getSymbol()));
 		savePathBuilder.append('/');
-		this.savePath = savePathBuilder.toString();
+		this.saveDir = savePathBuilder.toString();
 		
 		File saveDir = new File(savePath);
 		if (!saveDir.exists())
@@ -154,7 +154,7 @@ public final class DeckBuilderEngine {
 		System.err.println("End generation " + generation);
 		IntStream.range(0, population.size()).forEach(i -> {
 			final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
-			DeckUtils.saveDeck(savePath + "Gen_" + generation + "_Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
+			DeckUtils.saveDeck(saveDir + "Gen_" + generation + "_Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
 		});
 	}
 	
