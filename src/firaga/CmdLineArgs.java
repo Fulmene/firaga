@@ -32,27 +32,17 @@ public final class CmdLineArgs {
 		String formatString = null;
 		String colorString = null;
 		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("--format") || args[i].startsWith("-f")) {
-				if (formatString == null) {
-					if (args[i].startsWith("--"))
-						formatString = args[++i];
-					else
-						formatString = args[i].substring(2);
-				}
-				else {
+			if (args[i].equals("--format") || args[i].equals("-f")) {
+				if (formatString == null)
+					formatString = args[++i];
+				else
 					throw new IllegalArgumentException("Format specified more than once");
-				}
 			}
-			else if (args[i].equals("--color") || args[i].startsWith("-c")) {
-				if (colorString == null) {
-					if (args[i].startsWith("--"))
-						colorString = args[++i];
-					else
-						colorString = args[i].substring(2);
-				}
-				else {
+			else if (args[i].equals("--color") || args[i].equals("-c")) {
+				if (colorString == null)
+					colorString = args[++i];
+				else
 					throw new IllegalArgumentException("Color specified more than once");
-				}
 			}
 			else {
 				throw new IllegalArgumentException("Unknown argument: " + args[i]);
