@@ -59,7 +59,10 @@ public final class CmdLineArgs {
 
 		this.format = parseFormat(formatString.trim());
 		this.colors = parseColors(colorString.trim());
-		this.saveDir = saveDirString;
+		if (saveDirString == null)
+			this.saveDir = "output_decks";
+		else
+			this.saveDir = saveDirString;
 	}
 	
 	public final MagicFormat getFormat() {
