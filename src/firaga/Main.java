@@ -1,93 +1,52 @@
+/*
+ *  Copyright (C) 2018 Ada Joule
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package firaga;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import firaga.jenetics.DeckBuilderEngine;
 import firaga.magic.MagicDeckCreator;
-import firaga.magic.land.BasicLandGenerator;
-import magic.data.CardDefinitions;
-import magic.data.MagicPredefinedFormat;
-import magic.model.MagicCardDefinition;
-import magic.model.MagicColor;
+import io.jenetics.IntegerGene;
+import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
+import io.jenetics.stat.DoubleMomentStatistics;
 import magic.utility.MagicSystem;
 import magic.utility.ProgressReporter;
 
 public final class Main {
-	
-	private static int colorMask = 0;
-	
-	private static final void parseArguments(final String[] args) {
-		String colors = null;
-
-		if (args.length < 1) {
-			System.err.println("Usage: firaga [-c[COLORS]|--color [COLORS]]");
-			System.exit(1);
-		}
-
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("--color") || args[i].startsWith("-c")) {
-				if (colors == null) {
-					if (args[i].startsWith("--"))
-						colors = args[i+1];
-					else
-						colors = args[i].substring(2);
-				}
-				else {
-					System.err.println("ERROR: Colors assigned multiple times.");
-					System.exit(1);
-				}
-			}
-		}
-		
-		parseColor(colors);
-	}
-	
-	private static final void parseColor(final String colors) {
-		colorMask = 0;
-		final char[] upperCaseColorsArray = colors.toUpperCase().toCharArray();
-		Arrays.sort(upperCaseColorsArray);
-		final String sortedUpperCaseColors = new String(upperCaseColorsArray);
-		if (sortedUpperCaseColors.equals("C"))
-			return;
-		else if (sortedUpperCaseColors.matches("(B?)(G?)(R?)(U?)(W?)")) {
-			if (sortedUpperCaseColors.contains("B"))
-				colorMask |= MagicColor.Black.getMask();
-			if (sortedUpperCaseColors.contains("G"))
-				colorMask |= MagicColor.Green.getMask();
-			if (sortedUpperCaseColors.contains("R"))
-				colorMask |= MagicColor.Red.getMask();
-			if (sortedUpperCaseColors.contains("U"))
-				colorMask |= MagicColor.Blue.getMask();
-			if (sortedUpperCaseColors.contains("W"))
-				colorMask |= MagicColor.White.getMask();
-		}
-		else {
-			System.err.println("ERROR: Colors must be C (colorless) or any combination of WUBRG.");
-			System.exit(1);
-		}
-	}
 
 	public static final void main(final String[] args) {
-		
-		final long startTime = System.nanoTime();
-		
 		// Initialise Magarena
 		ProgressReporter reporter = new ProgressReporter();
 		MagicSystem.initialize(reporter);
 		
-		parseArguments(args);
+		final CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
 
-		List<MagicCardDefinition> spellPool =
-				CardDefinitions.getSpellCards().stream()
-					.filter(MagicPredefinedFormat.IXALAN_STANDARD::isCardLegal)
-					.filter(cdef -> (cdef.getColorFlags() | colorMask) == colorMask)
-					.collect(Collectors.toList());
-		DeckBuilderEngine engine = new DeckBuilderEngine(spellPool);
-		System.out.println(MagicDeckCreator.getMagicDeck(spellPool, engine.run(), BasicLandGenerator.getInstance()));
-		
-		System.out.println("Time: " + (System.nanoTime() - startTime));
+		final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), DeckBuilderEngine.DEFAULT_ENGINE_BUILDER, cmdLineArgs.getColors());
+		final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber(); 
+		final List<EvolutionResult<IntegerGene, Integer>> results = engine.stream().limit(3).peek(statistics).collect(Collectors.toList());
+		results.stream()
+			.filter(res -> res.getGeneration() > results.size() - 10)
+			.forEach(res ->
+				res.getPopulation().forEach(pt ->
+					System.out.println(pt.getGeneration() + " " + pt.getFitness() + " " + MagicDeckCreator.getMagicDeck(engine.getSpellPool(), pt.getGenotype(), engine.getLandGenerator()))));
+		System.out.println(statistics);
 	}
 
 }
