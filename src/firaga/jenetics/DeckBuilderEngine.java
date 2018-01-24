@@ -62,7 +62,7 @@ public final class DeckBuilderEngine {
 	public static final Engine.Builder<IntegerGene, Integer> DEFAULT_ENGINE_BUILDER =
 			Engine.builder(gt -> 0, IntegerChromosome.of(0, 0, 1))
 				.maximizing()
-				.populationSize(40)
+				.populationSize(20)
 				.survivorsFraction(0.25)
 				.survivorsSelector(new TournamentSelector<>(3))
 				.offspringSelector(new TournamentSelector<>(3))
