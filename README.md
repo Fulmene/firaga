@@ -32,3 +32,11 @@ Where [args] is
 --color		-c	COLOR	The color of the deck to build. COLOR is either C, which means a colorless deck, or a combination of WUBRG which tells that the deck contains which color: white(W), blue(U), black(B), red(R), and green(G).
 --savedir	-d	SAVEDIR	The save location of the output deck. Decks generated during each generation will be saved. Defaults to "output_decks".
 ```
+
+### Benchmark decks
+Benchmark decks must be stored inside Magarena directory: `lib/magarena/release/Magarena/decks/`
+
+The name of the deck file must be in the form: `Benchmark_[FORMAT_NAME]_[DECK_NAME].dec`
+
+### Development
+During this development phase, the format for testing the capability of FiraGA will be the Ixalan Standard format.
