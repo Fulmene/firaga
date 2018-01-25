@@ -153,9 +153,10 @@ public final class DeckBuilderEngine {
 		final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
 		final long generation = result.getGeneration();
 		System.out.println("End generation " + generation);
+		final String generationSaveDir = this.saveDir + "Generation_" + generation + "/";
 		IntStream.range(0, population.size()).forEach(i -> {
 			final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
-			DeckUtils.saveDeck(saveDir + "Gen_" + generation + "_Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
+			DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
 		});
 	}
 	
