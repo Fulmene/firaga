@@ -40,6 +40,7 @@ import io.jenetics.TournamentSelector;
 import io.jenetics.UniformCrossover;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.Limits;
 import io.jenetics.util.Factory;
 import io.jenetics.util.ISeq;
 import magic.data.CardDefinitions;
@@ -130,9 +131,9 @@ public final class DeckBuilderEngine {
 				.build();
 	}
 	
-	public final Stream<EvolutionResult<IntegerGene, Integer>>//EvolutionStream<IntegerGene, Integer>
+	public final Stream<EvolutionResult<IntegerGene, Integer>>
 	stream() {
-		return this.engine.stream().peek(this::saveDecks);
+		return this.engine.stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
 	}
 	
 	public final List<MagicCardDefinition> getSpellPool() {

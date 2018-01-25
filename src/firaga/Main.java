@@ -40,7 +40,7 @@ public final class Main {
 
 		final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), DeckBuilderEngine.DEFAULT_ENGINE_BUILDER, cmdLineArgs.getColors());
 		final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber(); 
-		final List<EvolutionResult<IntegerGene, Integer>> results = engine.stream().limit(3).peek(statistics).collect(Collectors.toList());
+		final List<EvolutionResult<IntegerGene, Integer>> results = engine.stream().peek(statistics).collect(Collectors.toList());
 		results.stream()
 			.filter(res -> res.getGeneration() > results.size() - 10)
 			.forEach(res ->
