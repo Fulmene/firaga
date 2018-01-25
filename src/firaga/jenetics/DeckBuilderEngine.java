@@ -154,6 +154,7 @@ public final class DeckBuilderEngine {
 		final long generation = result.getGeneration();
 		System.out.println("End generation " + generation);
 		final String generationSaveDir = this.saveDir + "Generation_" + generation + "/";
+		new File(generationSaveDir).mkdir();
 		IntStream.range(0, population.size()).forEach(i -> {
 			final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
 			DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
