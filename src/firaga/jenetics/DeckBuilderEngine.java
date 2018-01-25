@@ -20,7 +20,6 @@ package firaga.jenetics;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,7 +96,7 @@ public final class DeckBuilderEngine {
 
 		final String formatNameWithUnderscore = format.getName().replace(' ', '_');
 		try {
-			this.benchmarkDecks = Files.walk(Paths.get("lib/magarena/release/Magarena/decks"))
+			this.benchmarkDecks = Files.walk(DeckUtils.getDecksFolder())
 					.filter(Files::isRegularFile)
 					.filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore))
 					.map(DeckUtils::loadDeckFromFile)
