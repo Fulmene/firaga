@@ -112,7 +112,7 @@ public final class DeckBuilderEngine {
 		savePathBuilder.append(formatNameWithUnderscore);
 		savePathBuilder.append('/');
 		Arrays.stream(colors).sequential().forEach(c -> 
-			savePathBuilder.append(c.getSymbol()));
+			savePathBuilder.append(Character.toUpperCase(c.getSymbol())));
 		savePathBuilder.append('/');
 		this.saveDir = savePathBuilder.toString();
 		
