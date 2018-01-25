@@ -85,7 +85,7 @@ public final class DeckBuilderEngine {
 		this(format, DEFAULT_ENGINE_BUILDER, savePath, colors);
 	}
 
-	public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final String savePath, final MagicColor... colors) {
+	public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final String saveDir, final MagicColor... colors) {
 		final int colorMask = Arrays.stream(colors).map(c -> c.getMask()).reduce(0, (c1, c2) -> c1|c2);
 		this.spellPool = CardDefinitions.getSpellCards().stream()
 				.filter(format::isCardLegal)
@@ -106,7 +106,7 @@ public final class DeckBuilderEngine {
 		}
 		
 		final StringBuilder savePathBuilder = new StringBuilder();
-		savePathBuilder.append(savePath);
+		savePathBuilder.append(saveDir);
 		savePathBuilder.append('/');
 		savePathBuilder.append(formatNameWithUnderscore);
 		savePathBuilder.append('/');
@@ -115,12 +115,12 @@ public final class DeckBuilderEngine {
 		savePathBuilder.append('/');
 		this.saveDir = savePathBuilder.toString();
 		
-		File saveDir = new File(savePath);
-		if (!saveDir.exists())
-			saveDir.mkdirs();
-		else if (!saveDir.isDirectory())
+		File saveDirFile = new File(this.saveDir);
+		if (!saveDirFile.exists())
+			saveDirFile.mkdirs();
+		else if (!saveDirFile.isDirectory())
 			throw new RuntimeException("Cannot create save directory");
-		else if (!saveDir.canWrite())
+		else if (!saveDirFile.canWrite())
 			throw new RuntimeException("Cannot write to the save directory");
 		
 		this.gtf = Genotype.of(DeckChromosome.of(this.spellPoolSize));
