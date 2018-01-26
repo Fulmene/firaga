@@ -10,7 +10,7 @@ FiraGA requires Java 8 or greater.
 Clone the repository and its submodules. Build Magarena inside lib/magarena first, then create bin directory in the root directory of this repo.
 ### Windows
 ```
-mkdir javac -d bin\ -cp "src\;lib\jenetics\jenetics-4.0.0.jar;lib\magarena\release\Magarena.jar" src\firaga\Main.java
+javac -d bin\ -cp "src\;lib\jenetics\jenetics-4.0.0.jar;lib\magarena\release\Magarena.jar" src\firaga\Main.java
 ```
 ### Unix
 ```
