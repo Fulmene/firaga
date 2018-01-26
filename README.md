@@ -7,14 +7,14 @@ Currently, it uses [Magarena](https://magarena.github.io)'s AI and rule enforcem
 FiraGA requires Java 8 or greater.
 
 ## Building
-Clone the repository and its submodules, then build Magarena inside lib/magarena first
+Clone the repository and its submodules. Build Magarena inside lib/magarena first, then create bin directory in the root directory of this repo.
 ### Windows
 ```
-javac -d bin\ -cp "src\;lib\jenetics\jenetics-4.0.0.jar;lib\magarena\release\Magarena.jar" src\Main.java
+mkdir javac -d bin\ -cp "src\;lib\jenetics\jenetics-4.0.0.jar;lib\magarena\release\Magarena.jar" src\firaga\Main.java
 ```
 ### Unix
 ```
-javac -d bin/ -cp "src/:lib/jenetics/jenetics-4.0.0.jar:lib/magarena/release/Magarena.jar" src/Main.java
+javac -d bin/ -cp "src/:lib/jenetics/jenetics-4.0.0.jar:lib/magarena/release/Magarena.jar" src/firaga/Main.java
 ```
 
 ## Usage
