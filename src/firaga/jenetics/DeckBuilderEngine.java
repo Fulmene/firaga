@@ -30,12 +30,12 @@ import firaga.magic.MagicDeckCreator;
 import firaga.magic.MagicDuelHandler;
 import firaga.magic.land.LandGenerator;
 import firaga.magic.land.LandPool;
+import io.jenetics.EliteSelector;
 import io.jenetics.GaussianMutator;
 import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
 import io.jenetics.Phenotype;
-import io.jenetics.TournamentSelector;
 import io.jenetics.UniformCrossover;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -64,10 +64,10 @@ public final class DeckBuilderEngine {
 				.maximizing()
 				.populationSize(20)
 				.survivorsFraction(0.25)
-				.survivorsSelector(new TournamentSelector<>(3))
-				.offspringSelector(new TournamentSelector<>(3))
+				.survivorsSelector(new EliteSelector<>(5))
+				.offspringSelector(new EliteSelector<>(10))
 				.alterers(
-						new UniformCrossover<>(0.5, 0.5),
+						new UniformCrossover<>(1.0, 0.5),
 						new GaussianMutator<>(0.2));
 
 	private final Engine<IntegerGene, Integer> engine;
