@@ -1,5 +1,5 @@
 # FiraGA
-FiraGA is a fantasy card game deck builder based on Genetic Algorithm.
+FiraGA is a collectible card game deck builder based on Genetic Algorithm.
 It uses [Jenetics](http://jenetics.io) as the Genetic Algorithm implementation, and a card game playing AI system to playtest the deck and determine the fitness value of a deck.
 
 Currently, it uses [Magarena](https://magarena.github.io)'s AI and rule enforcement system to test the deck.
