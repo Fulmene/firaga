@@ -42,7 +42,12 @@ public final class Main {
 		
 		final CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
 
-        final ExecutorService executor = Executors.newFixedThreadPool(16);
+        final int processors = Runtime.getRuntime().availableProcessors();
+        final int usedProcessors = processors/4;
+
+        System.out.println("Available processors: " + processors + " Used: " + usedProcessors);
+
+        final ExecutorService executor = Executors.newFixedThreadPool(usedProcessors);
 
         try {
             final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
