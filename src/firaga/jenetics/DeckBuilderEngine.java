@@ -36,6 +36,8 @@ import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
 import io.jenetics.Phenotype;
+import io.jenetics.TournamentSelector;
+import io.jenetics.TruncationSelector;
 import io.jenetics.UniformCrossover;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -64,8 +66,8 @@ public final class DeckBuilderEngine {
 				.maximizing()
 				.populationSize(20)
 				.survivorsFraction(0.25)
-				.survivorsSelector(new EliteSelector<>(5))
-				.offspringSelector(new EliteSelector<>(10))
+				.survivorsSelector(new TruncationSelector<>(2))
+				.offspringSelector(new TournamentSelector<>(3))
 				.alterers(
 						new UniformCrossover<>(1.0, 0.5),
 						new GaussianMutator<>(0.2));
