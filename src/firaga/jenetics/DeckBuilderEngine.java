@@ -65,7 +65,7 @@ public final class DeckBuilderEngine {
 			Engine.builder(gt -> 0, IntegerChromosome.of(0, 0, 1))
 				.maximizing()
 				.populationSize(20)
-				.survivorsFraction(0.25)
+				.survivorsFraction(0.1)
 				.survivorsSelector(new TruncationSelector<>(2))
 				.offspringSelector(new TournamentSelector<>(3))
 				.alterers(
