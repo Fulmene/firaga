@@ -26,6 +26,7 @@ import firaga.jenetics.DeckBuilderEngine;
 import firaga.magic.MagicDeckCreator;
 import io.jenetics.IntegerGene;
 import io.jenetics.Phenotype;
+import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.stat.DoubleMomentStatistics;
@@ -44,7 +45,8 @@ public final class Main {
         final ExecutorService executor = Executors.newFixedThreadPool(16);
 
         try {
-            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), DeckBuilderEngine.DEFAULT_ENGINE_BUILDER, cmdLineArgs.getColors());
+            final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
+            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), engineBuilder, cmdLineArgs.getColors());
             final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber(); 
             final Phenotype<IntegerGene, Integer> bestPhenotype = engine.stream().peek(statistics).collect(EvolutionResult.toBestPhenotype());
             System.out.println("Best deck: " + MagicDeckCreator.getMagicDeck(engine.getSpellPool(), bestPhenotype.getGenotype(), engine.getLandGenerator()));
