@@ -17,10 +17,8 @@
 
 package firaga;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import firaga.jenetics.DeckBuilderEngine;
 import firaga.magic.MagicDeckCreator;
