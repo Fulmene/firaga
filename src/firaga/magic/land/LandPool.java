@@ -28,25 +28,25 @@ import magic.model.MagicColor;
 import magic.model.MagicDeck;
 
 public class LandPool implements LandGenerator {
-	
-	protected final List<MagicCardDefinition> lands;
 
-	public LandPool(MagicFormat format, MagicColor... colors) {
-		lands = CardDefinitions.getNonBasicLandCards()
-				.filter(format::isCardLegal)
-				.filter(card -> Arrays.stream(colors).map(card::getManaSource).reduce(Integer::sum).get() >= 5)
-				.collect(Collectors.toList());
-		if (colors.length > 0)
-			lands.addAll(Arrays.stream(colors).map(CardDefinitions::getBasicLand).collect(Collectors.toList()));
-		else // Use plains for colourless decks
-			lands.add(CardDefinitions.getBasicLand(MagicColor.White));
-	}
+    protected final List<MagicCardDefinition> lands;
 
-	@Override
-	public void addLands(MagicDeck deck) {
-		// TODO Work with non-basic lands
-		
-		BasicLandGenerator.getInstance().addLands(deck);
-	}
+    public LandPool(MagicFormat format, MagicColor... colors) {
+        lands = CardDefinitions.getNonBasicLandCards()
+            .filter(format::isCardLegal)
+            .filter(card -> Arrays.stream(colors).map(card::getManaSource).reduce(Integer::sum).get() >= 5)
+            .collect(Collectors.toList());
+        if (colors.length > 0)
+            lands.addAll(Arrays.stream(colors).map(CardDefinitions::getBasicLand).collect(Collectors.toList()));
+        else // Use plains for colourless decks
+            lands.add(CardDefinitions.getBasicLand(MagicColor.White));
+    }
+
+    @Override
+    public void addLands(MagicDeck deck) {
+        // TODO Work with non-basic lands
+
+        BasicLandGenerator.getInstance().addLands(deck);
+    }
 
 }

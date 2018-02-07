@@ -20,7 +20,7 @@ package firaga.magic.land;
 import magic.model.MagicDeck;
 
 public interface LandGenerator {
-	
-	void addLands(MagicDeck deck);
+
+    void addLands(MagicDeck deck);
 
 }

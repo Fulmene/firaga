@@ -35,12 +35,12 @@ import magic.utility.ProgressReporter;
 
 public final class Main {
 
-	public static final void main(final String[] args) {
-		// Initialise Magarena
-		ProgressReporter reporter = new ProgressReporter();
-		MagicSystem.initialize(reporter);
-		
-		final CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
+    public static final void main(final String[] args) {
+        // Initialise Magarena
+        ProgressReporter reporter = new ProgressReporter();
+        MagicSystem.initialize(reporter);
+
+        final CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
 
         final int processors = Runtime.getRuntime().availableProcessors();
         final int usedProcessors = processors/4;
@@ -60,6 +60,6 @@ public final class Main {
         } finally {
             executor.shutdown();
         }
-	}
+    }
 
 }

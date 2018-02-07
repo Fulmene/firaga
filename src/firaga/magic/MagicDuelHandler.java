@@ -27,38 +27,38 @@ import magic.model.MagicGame;
 import magic.model.player.AiProfile;
 
 public final class MagicDuelHandler {
-	
-	private static final int NR_OF_GAMES = 10;
-	
-	private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTS;
-	private static final int AI_LEVEL = 1;
 
-	public static Integer getDuelScore(final MagicDeck... decks) {
-		
-		if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.runDuel only accepts 2 decks");
-		if (decks[0] == null || decks[1] == null) throw new NullPointerException();
+    private static final int NR_OF_GAMES = 10;
 
-		final DuelConfig config = new DuelConfig();
-		config.setNrOfGames(NR_OF_GAMES);
-		
-		final MagicDuel duel = new MagicDuel(config);
-		duel.initialize();
-		
-		final DuelPlayerConfig[] players = new DuelPlayerConfig[2];
-		for (int i = 0; i < players.length; i++) {
-			players[i] = new DuelPlayerConfig(AiProfile.create(decks[i].toString(), AI_TYPE, AI_LEVEL), null);
-			players[i].setDeck(decks[i]);
-		}
-		duel.setPlayers(players);
-		
-		while (duel.getGamesPlayed() < duel.getGamesTotal()) {
-			final MagicGame game = duel.nextGame();
-			game.setArtificial(true);
-			final HeadlessGameController controller = new HeadlessGameController(game, 600000);
-			controller.runGame();
-		}
+    private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTS;
+    private static final int AI_LEVEL = 1;
 
-		return duel.getGamesWon(); // TODO add more statistics
-	}
+    public static Integer getDuelScore(final MagicDeck... decks) {
+
+        if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.runDuel only accepts 2 decks");
+        if (decks[0] == null || decks[1] == null) throw new NullPointerException();
+
+        final DuelConfig config = new DuelConfig();
+        config.setNrOfGames(NR_OF_GAMES);
+
+        final MagicDuel duel = new MagicDuel(config);
+        duel.initialize();
+
+        final DuelPlayerConfig[] players = new DuelPlayerConfig[2];
+        for (int i = 0; i < players.length; i++) {
+            players[i] = new DuelPlayerConfig(AiProfile.create(decks[i].toString(), AI_TYPE, AI_LEVEL), null);
+            players[i].setDeck(decks[i]);
+        }
+        duel.setPlayers(players);
+
+        while (duel.getGamesPlayed() < duel.getGamesTotal()) {
+            final MagicGame game = duel.nextGame();
+            game.setArtificial(true);
+            final HeadlessGameController controller = new HeadlessGameController(game, 600000);
+            controller.runGame();
+        }
+
+        return duel.getGamesWon(); // TODO add more statistics
+    }
 
 }
