@@ -46,7 +46,7 @@ public final class MagicDuelHandler {
 
         final DuelPlayerConfig[] players = new DuelPlayerConfig[2];
         for (int i = 0; i < players.length; i++) {
-            players[i] = new DuelPlayerConfig(AiProfile.create(decks[i].toString(), AI_TYPE, AI_LEVEL), null);
+            players[i] = new DuelPlayerConfig(AiProfile.create("Player" + i, AI_TYPE, AI_LEVEL), null);
             players[i].setDeck(decks[i]);
         }
         duel.setPlayers(players);
