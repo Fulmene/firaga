@@ -31,7 +31,7 @@ public final class MagicDuelHandler {
     private static final int NR_OF_GAMES = 10;
 
     private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTS;
-    private static final int AI_LEVEL = 1;
+    private static final int AI_LEVEL = 2;
 
     public static Integer getDuelScore(final MagicDeck... decks) {
 
