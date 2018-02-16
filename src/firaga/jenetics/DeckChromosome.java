@@ -100,7 +100,7 @@ public class DeckChromosome extends IntegerChromosome {
         while (spellCount < targetSpellCount) {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
-            final int amount = Math.min(spellCount - targetSpellCount, MagicConstants.MAX_COPIES - random.nextInt(2));
+            final int amount = Math.min(targetSpellCount - spellCount, MagicConstants.MAX_COPIES - random.nextInt(2));
             newGenes[selected] += amount;
             availableCards.remove(selectedIndex);
             spellCount += amount;
