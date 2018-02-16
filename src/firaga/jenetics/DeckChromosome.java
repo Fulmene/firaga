@@ -64,7 +64,7 @@ public class DeckChromosome extends IntegerChromosome {
 
     @Override
     public IntegerChromosome newInstance() {
-        final ISeq<IntegerGene> genes = addCards(this.empty, getRandomSpellCount(), true);
+        final ISeq<IntegerGene> genes = addCards(this.empty, getRandomSpellCount());
         return new DeckChromosome(genes, genes.size());
     }
 
@@ -75,8 +75,7 @@ public class DeckChromosome extends IntegerChromosome {
     private static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
         final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
         if (spellCount < MagicConstants.MIN_SPELLS) {
-            final boolean useNewCards = RandomRegistry.getRandom().nextBoolean();
-            return addCards(genes, getRandomSpellCount(), useNewCards);
+            return addCards(genes, getRandomSpellCount());
         }
         else if (spellCount > MagicConstants.MAX_SPELLS) {
             return removeCards(genes, getRandomSpellCount());
@@ -86,7 +85,7 @@ public class DeckChromosome extends IntegerChromosome {
         }
     }
 
-    private static final ISeq<IntegerGene> addCards(final ISeq<IntegerGene> genes, final int targetSpellCount, final boolean useNewCards) {
+    private static final ISeq<IntegerGene> addCards(final ISeq<IntegerGene> genes, final int targetSpellCount) {
         final int[] newGenes = genes.stream().mapToInt(g -> g.intValue()).toArray();
         int spellCount = Arrays.stream(newGenes).sum();
 
@@ -94,28 +93,17 @@ public class DeckChromosome extends IntegerChromosome {
         final Random random = RandomRegistry.getRandom();
 
         List<Integer> availableCards = IntStream.range(0, spellPoolSize)
-            .filter(n -> {
-                return (useNewCards || newGenes[n] > 0) && newGenes[n] < MagicConstants.MAX_COPIES; })
+            .filter(n -> newGenes[n] == 0)
             .boxed()
             .collect(Collectors.toList());
 
         while (spellCount < targetSpellCount) {
-
-            // If there is no more available cards,
-            // it means useNewCards is false, but all available cards are maxed.
-            // So, add unused cards to availableCards.
-            if (availableCards.isEmpty()) {
-                IntStream.range(0, spellPoolSize)
-                    .filter(n -> newGenes[n] == 0)
-                    .forEachOrdered(availableCards::add);
-            }
-
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
-            newGenes[selected]++;
-            if (newGenes[selected] == MagicConstants.MAX_COPIES)
-                availableCards.remove(selectedIndex);
-            spellCount++;
+            final int amount = Math.min(spellCount - targetSpellCount, MagicConstants.MAX_COPIES - random.nextInt(2));
+            newGenes[selected] += amount;
+            availableCards.remove(selectedIndex);
+            spellCount += amount;
         }
 
         return Arrays.stream(newGenes).boxed().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
@@ -136,10 +124,10 @@ public class DeckChromosome extends IntegerChromosome {
         while (spellCount > targetSpellCount) {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
-            newGenes[selected]--;
-            if (newGenes[selected] == 0)
-                availableCards.remove(selectedIndex);
-            spellCount--;
+            final int amount = Math.min(spellCount - targetSpellCount, newGenes[selected]);
+            newGenes[selected] -= amount;
+            availableCards.remove(selectedIndex);
+            spellCount -= amount;
         }
 
         return Arrays.stream(newGenes).boxed().map(GENE_PROTOTYPE::newInstance).collect(ISeq.toISeq());
