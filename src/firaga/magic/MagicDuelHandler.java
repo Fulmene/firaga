@@ -30,12 +30,12 @@ public final class MagicDuelHandler {
 
     private static final int NR_OF_GAMES = 10;
 
-    private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTS;
-    private static final int AI_LEVEL = 2;
+    private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTSC;
+    private static final int AI_LEVEL = 1;
 
     public static Integer getDuelScore(final MagicDeck... decks) {
 
-        if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.runDuel only accepts 2 decks");
+        if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.getDuelScore only accepts 2 decks");
         if (decks[0] == null || decks[1] == null) throw new NullPointerException();
 
         final DuelConfig config = new DuelConfig();
