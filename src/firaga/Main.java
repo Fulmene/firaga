@@ -42,7 +42,8 @@ public final class Main {
 
         final CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
 
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final int maxThreads = Runtime.getRuntime().availableProcessors();
+        final ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         try {
             final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
