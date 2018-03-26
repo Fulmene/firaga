@@ -81,7 +81,7 @@ public final class CmdLineArgs {
         return MagicPredefinedFormat.values().stream()
             .filter(fmt -> fmt.getName().equalsIgnoreCase(formatString))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Unknown format"));
+            .orElseThrow(() -> new IllegalArgumentException("Unknown format " + formatString));
     }
 
     private static final MagicColor[] parseColors(final String colorString) {
@@ -96,7 +96,7 @@ public final class CmdLineArgs {
                 .toArray(MagicColor[]::new);
         }
         else {
-            throw new IllegalArgumentException("Colors is not be C (colorless) or any combination of WUBRG.");
+            throw new IllegalArgumentException("Colors is " + colorString + ", expected C (colorless) or any combination of WUBRG.");
         }
     }
 
