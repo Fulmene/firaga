@@ -1,0 +1,30 @@
+apply plugin: "java"
+apply plugin: "application"
+
+sourceCompatibility = 1.8
+version = 'alpha'
+
+dependencies {
+    compile files('lib/magarena/release/Magarena.jar')
+    compile files('lib/jenetics/jenetics-4.0.0.jar')
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'firaga.Main'
+        )
+    }
+}
+
+sourceSets {
+    main.java.srcDir "src/"
+}
+
+mainClassName = "firaga.Main"
+applicationDefaultJvmArgs = ["-Xms256M", "-Xmx512M", "-noverify", "-Dmagarena.dir=lib/magarena/release"]
+run {
+    if (project.hasProperty('runArgs')) {
+        args(runArgs.split(","))
+    }
+}
