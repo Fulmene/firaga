@@ -137,6 +137,11 @@ public final class DeckBuilderEngine {
         return this.engine.stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
     }
 
+    public final Stream<EvolutionResult<IntegerGene, Integer>>
+    stream(EvolutionResult<IntegerGene, Integer> result, int level) {
+        return this.engine.stream(result).limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+    }
+
     public final List<MagicCardDefinition> getSpellPool() {
         return this.spellPool;
     }
