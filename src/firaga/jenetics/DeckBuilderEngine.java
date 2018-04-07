@@ -133,9 +133,9 @@ public final class DeckBuilderEngine {
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
-        stream() {
-            return this.engine.stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
-        }
+    stream() {
+        return this.engine.stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+    }
 
     public final List<MagicCardDefinition> getSpellPool() {
         return this.spellPool;
@@ -151,16 +151,18 @@ public final class DeckBuilderEngine {
     }
 
     private final void saveDecks(EvolutionResult<IntegerGene, Integer> result) {
-        final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
-        final long generation = result.getGeneration();
-        System.out.println("End generation " + generation);
-        System.out.println(result.getDurations().getEvolveDuration());
-        final String generationSaveDir = this.saveDir + "Generation_" + generation + "/";
-        new File(generationSaveDir).mkdir();
-        IntStream.range(0, population.size()).forEach(i -> {
-            final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
-            DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
-        });
+        if (result.getGeneration() % 5 == 0) {
+            final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
+            final long generation = result.getGeneration();
+            System.out.println("End generation " + generation);
+            System.out.println(result.getDurations().getEvolveDuration());
+            final String generationSaveDir = this.saveDir + "Generation_" + generation + "/";
+            new File(generationSaveDir).mkdir();
+            IntStream.range(0, population.size()).forEach(i -> {
+                final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
+                DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
+            });
+        }
     }
 
 }
