@@ -7,9 +7,9 @@ Currently, it uses [Magarena](https://magarena.github.io)'s AI and rule enforcem
 FiraGA requires Java 8 or greater.
 
 ## Building
-Clone the repository and its submodules. Build Magarena inside lib/magarena first.
+Clone the repository and its submodules. Then build with Gradle.
 ```
-./gradlew build
+./gradlew
 ```
 
 ## Usage
