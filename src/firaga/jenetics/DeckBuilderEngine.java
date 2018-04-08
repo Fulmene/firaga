@@ -104,7 +104,7 @@ public final class DeckBuilderEngine {
                 try {
                     return Files.walk(DeckUtils.getDecksFolder())
                         .filter(Files::isRegularFile)
-                        .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore + "LV" + level))
+                        .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore + "_LV" + level))
                         .map(DeckUtils::loadDeckFromFile)
                         .toArray(MagicDeck[]::new);
                 } catch (IOException e) {
