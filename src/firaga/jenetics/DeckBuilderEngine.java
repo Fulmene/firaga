@@ -171,7 +171,7 @@ public final class DeckBuilderEngine {
                 System.out.println("End level " + level + " generation " + generation);
                 System.out.println(result.getDurations().getEvolveDuration());
                 final String generationSaveDir = this.saveDir + "Level_" + level + "/Generation_" + generation + "/";
-                new File(generationSaveDir).mkdir();
+                new File(generationSaveDir).mkdirs();
                 IntStream.range(0, population.size()).forEach(i -> {
                     final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
                     DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
