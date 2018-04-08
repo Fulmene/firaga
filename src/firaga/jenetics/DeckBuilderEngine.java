@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -57,7 +58,7 @@ public final class DeckBuilderEngine {
     private final List<MagicCardDefinition> spellPool;
     private final int spellPoolSize;
     private final LandGenerator landGenerator;
-    private final MagicDeck[] benchmarkDecks;
+    private final List<MagicDeck[]> benchmarkDecks;
     private final String saveDir;
 
     // Genetic algorithm parameters
@@ -72,22 +73,22 @@ public final class DeckBuilderEngine {
                 new UniformCrossover<>(1.0, 0.5),
                 new GaussianMutator<>(0.2));
 
-    private final Engine<IntegerGene, Integer> engine;
+    private final List<Engine<IntegerGene, Integer>> engines;
     private final Factory<Genotype<IntegerGene>> gtf;
 
     public DeckBuilderEngine(final MagicFormat format, final MagicColor... colors) {
-        this(format, DEFAULT_ENGINE_BUILDER, "output_decks", colors);
+        this(format, DEFAULT_ENGINE_BUILDER, "output_decks", 4, colors);
     }
 
     public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final MagicColor... colors) {
-        this(format, engineBuilder, "output_decks", colors);
+        this(format, engineBuilder, "output_decks", 4, colors);
     }
 
     public DeckBuilderEngine(final MagicFormat format, final String savePath, final MagicColor... colors) {
-        this(format, DEFAULT_ENGINE_BUILDER, savePath, colors);
+        this(format, DEFAULT_ENGINE_BUILDER, savePath, 4, colors);
     }
 
-    public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final String saveDir, final MagicColor... colors) {
+    public DeckBuilderEngine(final MagicFormat format, final Engine.Builder<IntegerGene, Integer> engineBuilder, final String saveDir, final int totalLevel, final MagicColor... colors) {
         final int colorMask = Arrays.stream(colors).map(c -> c.getMask()).reduce(0, (c1, c2) -> c1|c2);
         this.spellPool = CardDefinitions.getSpellCards().stream()
             .filter(format::isCardLegal)
@@ -97,15 +98,18 @@ public final class DeckBuilderEngine {
         this.landGenerator = new LandPool(format, colors);
 
         final String formatNameWithUnderscore = format.getName().replace(' ', '_');
-        try {
-            this.benchmarkDecks = Files.walk(DeckUtils.getDecksFolder())
-                .filter(Files::isRegularFile)
-                .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore))
-                .map(DeckUtils::loadDeckFromFile)
-                .toArray(MagicDeck[]::new);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.benchmarkDecks = IntStream.range(0, totalLevel).mapToObj(
+            level -> {
+                try {
+                    return Files.walk(DeckUtils.getDecksFolder())
+                        .filter(Files::isRegularFile)
+                        .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore + "LV" + level))
+                        .map(DeckUtils::loadDeckFromFile)
+                        .toArray(MagicDeck[]::new);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
 
         final StringBuilder savePathBuilder = new StringBuilder();
         savePathBuilder.append(saveDir);
@@ -126,20 +130,21 @@ public final class DeckBuilderEngine {
             throw new RuntimeException("Cannot write to the save directory");
 
         this.gtf = Genotype.of(DeckChromosome.of(this.spellPoolSize));
-        this.engine = engineBuilder.copy()
-            .fitnessFunction(this::fitness)
-            .genotypeFactory(this.gtf)
-            .build();
+        this.engines = IntStream.range(0, totalLevel).mapToObj(
+            level -> engineBuilder.copy()
+                .fitnessFunction(this.fitness(level))
+                .genotypeFactory(this.gtf)
+                .build()).collect(Collectors.toList());
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
     stream() {
-        return this.engine.stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+        return this.engines.get(0).stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
     stream(EvolutionResult<IntegerGene, Integer> result, int level) {
-        return this.engine.stream(result).limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+        return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
     }
 
     public final List<MagicCardDefinition> getSpellPool() {
@@ -150,9 +155,11 @@ public final class DeckBuilderEngine {
         return this.landGenerator;
     }
 
-    private final Integer fitness(final Genotype<IntegerGene> gt) {
-        MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
-        return Arrays.stream(benchmarkDecks).parallel().map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
+    private final Function<Genotype<IntegerGene>, Integer> fitness(final int level) {
+        return gt -> {
+            MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
+            return Arrays.stream(benchmarkDecks.get(level)).parallel().map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
+        };
     }
 
     private final void saveDecks(EvolutionResult<IntegerGene, Integer> result) {
