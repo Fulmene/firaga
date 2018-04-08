@@ -46,13 +46,20 @@ public final class Main {
         final ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         try {
-            final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
-            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), engineBuilder, cmdLineArgs.getColors());
+            //final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
+            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), cmdLineArgs.getColors());
             final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber(); 
-            final Phenotype<IntegerGene, Integer> bestPhenotype = engine.stream().peek(statistics).collect(EvolutionResult.toBestPhenotype());
-            System.out.println("Best deck: " + MagicDeckCreator.getMagicDeck(engine.getSpellPool(), bestPhenotype.getGenotype(), engine.getLandGenerator()));
-            System.out.println("Score: " + bestPhenotype.getFitness());
+            EvolutionResult<IntegerGene, Integer> result = engine.stream().peek(statistics).collect(EvolutionResult.toBestEvolutionResult());
+            System.out.println("End level 0");
             System.out.println(statistics);
+
+            for (int level = 1; level < 4; level++) {
+                final EvolutionResult<IntegerGene, Integer> nextResult = engine.stream(result, level).peek(statistics).collect(EvolutionResult.toBestEvolutionResult());
+                System.out.println("End level " + level);
+                System.out.println(statistics);
+                result = nextResult;
+            }
+
         } finally {
             executor.shutdown();
         }
