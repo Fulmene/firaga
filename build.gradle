@@ -4,6 +4,18 @@ apply plugin: "application"
 sourceCompatibility = 1.8
 version = 'alpha'
 
+task magarena(type: Exec) {
+    workingDir "lib/magarena"
+    commandLine "make", "all"
+}
+
+task decks(type: Copy) {
+    from "resources/benchmark-decks/Ixalan Standard"
+    into "lib/magarena/release/Magarena/decks"
+}
+
+defaultTasks "magarena", "decks", "build"
+
 dependencies {
     compile files('lib/magarena/release/Magarena.jar')
     compile files('lib/jenetics/jenetics-4.0.0.jar')
