@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -139,12 +140,12 @@ public final class DeckBuilderEngine {
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
     stream() {
-        return this.engines.get(0).stream().limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+        return this.engines.get(0).stream().limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(0));
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
     stream(EvolutionResult<IntegerGene, Integer> result, int level) {
-        return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this::saveDecks);
+        return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
     }
 
     public final List<MagicCardDefinition> getSpellPool() {
@@ -162,19 +163,21 @@ public final class DeckBuilderEngine {
         };
     }
 
-    private final void saveDecks(EvolutionResult<IntegerGene, Integer> result) {
-        if (result.getGeneration() % 5 == 0) {
-            final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
-            final long generation = result.getGeneration();
-            System.out.println("End generation " + generation);
-            System.out.println(result.getDurations().getEvolveDuration());
-            final String generationSaveDir = this.saveDir + "Generation_" + generation + "/";
-            new File(generationSaveDir).mkdir();
-            IntStream.range(0, population.size()).forEach(i -> {
-                final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
-                DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
-            });
-        }
+    private final Consumer<EvolutionResult<IntegerGene, Integer>> saveDecks(int level) {
+        return result -> {
+            if (result.getGeneration() % 5 == 0) {
+                final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
+                final long generation = result.getGeneration();
+                System.out.println("End generation " + generation);
+                System.out.println(result.getDurations().getEvolveDuration());
+                final String generationSaveDir = this.saveDir + "Level_" + level + "/Generation_" + generation + "/";
+                new File(generationSaveDir).mkdir();
+                IntStream.range(0, population.size()).forEach(i -> {
+                    final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
+                    DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
+                });
+            }
+        };
     }
 
 }
