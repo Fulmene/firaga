@@ -168,7 +168,7 @@ public final class DeckBuilderEngine {
             if (result.getGeneration() % 5 == 0) {
                 final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
                 final long generation = result.getGeneration();
-                System.out.println("End generation " + generation);
+                System.out.println("End level " + level + " generation " + generation);
                 System.out.println(result.getDurations().getEvolveDuration());
                 final String generationSaveDir = this.saveDir + "Level_" + level + "/Generation_" + generation + "/";
                 new File(generationSaveDir).mkdir();
