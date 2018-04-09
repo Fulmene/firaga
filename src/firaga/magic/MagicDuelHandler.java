@@ -32,6 +32,7 @@ public final class MagicDuelHandler {
 
     private static final MagicAIImpl AI_TYPE = MagicAIImpl.MCTSC;
     private static final int AI_LEVEL = 1;
+    private static final int MAX_TIME = 3600000;
 
     public static Integer getDuelScore(final MagicDeck... decks) {
 
@@ -54,7 +55,7 @@ public final class MagicDuelHandler {
         while (duel.getGamesPlayed() < duel.getGamesTotal()) {
             final MagicGame game = duel.nextGame();
             game.setArtificial(true);
-            final HeadlessGameController controller = new HeadlessGameController(game, 600000);
+            final HeadlessGameController controller = new HeadlessGameController(game, MAX_TIME);
             controller.runGame();
         }
 
