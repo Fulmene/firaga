@@ -145,7 +145,10 @@ public final class DeckBuilderEngine {
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
     stream(EvolutionResult<IntegerGene, Integer> result, int level) {
-        return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
+        if (level == this.engines.size() - 1)
+            return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
+        else
+            return this.engines.get(level).stream(result).limit(Limits.byFitnessThreshold(8)).limit(100).peek(this.saveDecks(level));
     }
 
     public final List<MagicCardDefinition> getSpellPool() {
