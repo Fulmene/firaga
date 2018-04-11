@@ -86,7 +86,7 @@ public final class MagicDuelHandler {
         decks[0].setDeckType(DeckType.Custom);
         decks[1].setDeckType(DeckType.Custom);
 
-        final DuelConfig config = new DuelConfig();
+        final DuelConfig config = DuelConfig.getInstance();
         config.setNrOfGames(NR_OF_GAMES);
 
         final MagicDuel duel = new MagicDuel(config);
