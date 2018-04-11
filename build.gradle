@@ -34,7 +34,7 @@ sourceSets {
 }
 
 mainClassName = "firaga.Main"
-applicationDefaultJvmArgs = ["-Xms256M", "-Xmx512M", "-noverify", "-Dmagarena.dir=lib/magarena/release"]
+applicationDefaultJvmArgs = ["-Xms256M", "-Xmx64G", "-noverify", "-Dmagarena.dir=lib/magarena/release"]
 run {
     if (project.hasProperty('runArgs')) {
         args(runArgs.split(","))
