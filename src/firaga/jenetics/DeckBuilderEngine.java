@@ -20,6 +20,7 @@ package firaga.jenetics;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -108,13 +109,14 @@ public final class DeckBuilderEngine {
                 try {
                     return Files.walk(DeckUtils.getDecksFolder())
                         .filter(Files::isRegularFile)
-                        .map(file -> file.getFileName().toString())
-                        .filter(fileName -> fileName.startsWith("Benchmark_" + formatNameWithUnderscore + "_LV" + level))
+                        .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore + "_LV" + level))
+                        .map(Path::toString)
                         .toArray(String[]::new);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }).collect(Collectors.toList());
+        System.err.println(benchmarkDecks.get(0)[0]);
 
         final StringBuilder savePathBuilder = new StringBuilder();
         savePathBuilder.append(saveDir);
