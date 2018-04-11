@@ -32,6 +32,7 @@ import firaga.magic.MagicDeckCreator;
 import firaga.magic.MagicDuelHandler;
 import firaga.magic.land.LandGenerator;
 import firaga.magic.land.LandPool;
+import firaga.util.Counter;
 import io.jenetics.EliteSelector;
 import io.jenetics.GaussianMutator;
 import io.jenetics.Genotype;
@@ -59,7 +60,7 @@ public final class DeckBuilderEngine {
     private final List<MagicCardDefinition> spellPool;
     private final int spellPoolSize;
     private final LandGenerator landGenerator;
-    private final List<MagicDeck[]> benchmarkDecks;
+    private final List<String[]> benchmarkDecks;
     private final String saveDir;
 
     // Genetic algorithm parameters
@@ -76,6 +77,9 @@ public final class DeckBuilderEngine {
 
     private final List<Engine<IntegerGene, Integer>> engines;
     private final Factory<Genotype<IntegerGene>> gtf;
+
+    // Utility
+    private final Counter counter;
 
     public DeckBuilderEngine(final MagicFormat format, final MagicColor... colors) {
         this(format, DEFAULT_ENGINE_BUILDER, "output_decks", 4, colors);
@@ -104,9 +108,9 @@ public final class DeckBuilderEngine {
                 try {
                     return Files.walk(DeckUtils.getDecksFolder())
                         .filter(Files::isRegularFile)
-                        .filter(file -> file.getFileName().toString().startsWith("Benchmark_" + formatNameWithUnderscore + "_LV" + level))
-                        .map(DeckUtils::loadDeckFromFile)
-                        .toArray(MagicDeck[]::new);
+                        .map(file -> file.getFileName().toString())
+                        .filter(fileName -> fileName.startsWith("Benchmark_" + formatNameWithUnderscore + "_LV" + level))
+                        .toArray(String[]::new);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -136,6 +140,8 @@ public final class DeckBuilderEngine {
                 .fitnessFunction(this.fitness(level))
                 .genotypeFactory(this.gtf)
                 .build()).collect(Collectors.toList());
+
+        this.counter = new Counter(32);
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
@@ -162,7 +168,9 @@ public final class DeckBuilderEngine {
     private final Function<Genotype<IntegerGene>, Integer> fitness(final int level) {
         return gt -> {
             MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, gt, this.landGenerator);
-            return Arrays.stream(benchmarkDecks.get(level)).parallel().map(opp -> MagicDuelHandler.getDuelScore(deck, opp)).reduce(Integer::sum).orElse(0);
+            String deckPath = DeckUtils.getDecksFolder().toString() + "/" + counter.getNext() + ".dec";
+            DeckUtils.saveDeck(deckPath, deck);
+            return Arrays.stream(benchmarkDecks.get(level)).parallel().map(opp -> MagicDuelHandler.getDuelScore(deckPath, opp)).reduce(Integer::sum).orElse(0);
         };
     }
 
@@ -170,14 +178,16 @@ public final class DeckBuilderEngine {
         return result -> {
             final ISeq<Phenotype<IntegerGene, Integer>> population = result.getPopulation();
             final long generation = result.getGeneration();
-            System.out.println("End level " + level + " generation " + generation);
-            System.out.println(result.getDurations().getEvolveDuration());
-            final String generationSaveDir = this.saveDir + "Level_" + level + "/Generation_" + generation + "/";
-            new File(generationSaveDir).mkdirs();
-            IntStream.range(0, population.size()).forEach(i -> {
-                final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
-                DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
-            });
+            if (generation % 5 == 0) {
+                System.out.println("End level " + level + " generation " + generation);
+                System.out.println(result.getDurations().getEvolveDuration());
+                final String generationSaveDir = this.saveDir + "Level_" + level + "/Generation_" + generation + "/";
+                new File(generationSaveDir).mkdirs();
+                IntStream.range(0, population.size()).forEach(i -> {
+                    final MagicDeck deck = MagicDeckCreator.getMagicDeck(this.spellPool, population.get(i).getGenotype(), this.landGenerator);
+                    DeckUtils.saveDeck(generationSaveDir + "Deck_" + i + "_(" + population.get(i).getFitness() + ").dec", deck);
+                });
+            }
         };
     }
 
