@@ -83,9 +83,6 @@ public final class MagicDuelHandler {
         if (decks.length != 2) throw new IllegalArgumentException("MagicDuelHandler.getDuelScore only accepts 2 decks");
         if (decks[0] == null || decks[1] == null) throw new NullPointerException();
 
-        decks[0].setDeckType(DeckType.Custom);
-        decks[1].setDeckType(DeckType.Custom);
-
         final DuelConfig config = DuelConfig.getInstance();
         config.setNrOfGames(NR_OF_GAMES);
 
