@@ -46,8 +46,8 @@ public final class Main {
         final ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         try {
-            //final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.executor(executor);
-            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), cmdLineArgs.getColors());
+            final Engine.Builder<IntegerGene, Integer> engineBuilder = DeckBuilderEngine.DEFAULT_ENGINE_BUILDER.copy().executor(executor);
+            final DeckBuilderEngine engine = new DeckBuilderEngine(cmdLineArgs.getFormat(), engineBuilder, cmdLineArgs.getColors());
             final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics = EvolutionStatistics.ofNumber(); 
             EvolutionResult<IntegerGene, Integer> result = engine.stream().peek(statistics).collect(EvolutionResult.toBestEvolutionResult());
             System.out.println("End level 0");
