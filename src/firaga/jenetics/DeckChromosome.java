@@ -64,7 +64,7 @@ public class DeckChromosome extends IntegerChromosome {
 
     @Override
     public IntegerChromosome newInstance() {
-        final ISeq<IntegerGene> genes = addCards(this.empty, getRandomSpellCount());
+        ISeq<IntegerGene> genes = addCards(this.empty, getRandomSpellCount());
         return new DeckChromosome(genes, genes.size());
     }
 
@@ -101,6 +101,8 @@ public class DeckChromosome extends IntegerChromosome {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
             final int amount = MagicConstants.MAX_COPIES - random.nextInt(2);
+            if (spellCount + amount > MagicConstants.MAX_SPELLS)
+                break;
             newGenes[selected] += amount;
             availableCards.remove(selectedIndex);
             spellCount += amount;
@@ -125,6 +127,8 @@ public class DeckChromosome extends IntegerChromosome {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
             final int amount = newGenes[selected];
+            if (spellCount - amount < MagicConstants.MIN_SPELLS)
+                break;
             newGenes[selected] -= amount;
             availableCards.remove(selectedIndex);
             spellCount -= amount;
