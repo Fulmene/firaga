@@ -9,7 +9,7 @@ public class Counter {
 
     public Counter(int maxCount) {
         this.maxCount = maxCount;
-        this.count.set(0);
+        this.count = new AtomicInteger(0);
     }
 
     public int getNext() {
