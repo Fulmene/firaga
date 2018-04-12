@@ -75,10 +75,10 @@ public class DeckChromosome extends IntegerChromosome {
     private static final ISeq<IntegerGene> validateDeckSize(final ISeq<IntegerGene> genes) {
         final int spellCount = genes.stream().mapToInt(g -> g.intValue()).sum();
         if (spellCount < MagicConstants.MIN_SPELLS) {
-            return addCards(genes, getRandomSpellCount());
+            return addCards(genes, MagicConstants.MIN_SPELLS);
         }
         else if (spellCount > MagicConstants.MAX_SPELLS) {
-            return removeCards(genes, getRandomSpellCount());
+            return removeCards(genes, MagicConstants.MAX_SPELLS);
         }
         else {
             return genes;
@@ -100,7 +100,7 @@ public class DeckChromosome extends IntegerChromosome {
         while (spellCount < targetSpellCount) {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
-            final int amount = Math.min(targetSpellCount - spellCount, MagicConstants.MAX_COPIES - random.nextInt(2));
+            final int amount = MagicConstants.MAX_COPIES - random.nextInt(2);
             newGenes[selected] += amount;
             availableCards.remove(selectedIndex);
             spellCount += amount;
@@ -124,7 +124,7 @@ public class DeckChromosome extends IntegerChromosome {
         while (spellCount > targetSpellCount) {
             final int selectedIndex = random.nextInt(availableCards.size());
             final int selected = availableCards.get(selectedIndex);
-            final int amount = Math.min(spellCount - targetSpellCount, newGenes[selected]);
+            final int amount = newGenes[selected];
             newGenes[selected] -= amount;
             availableCards.remove(selectedIndex);
             spellCount -= amount;
