@@ -150,7 +150,7 @@ public final class DeckBuilderEngine {
         if (level == this.engines.size() - 1)
             return this.engines.get(level).stream().limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
         else
-            return this.engines.get(level).stream().limit(Limits.byFitnessThreshold(7)).limit(100).peek(this.saveDecks(level));
+            return this.engines.get(level).stream().limit(Limits.byFitnessThreshold(7)).limit(50).peek(this.saveDecks(level));
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
@@ -158,7 +158,7 @@ public final class DeckBuilderEngine {
         if (level == this.engines.size() - 1)
             return this.engines.get(level).stream(result).limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
         else
-            return this.engines.get(level).stream(result).limit(Limits.byFitnessThreshold(7)).limit(100).peek(this.saveDecks(level));
+            return this.engines.get(level).stream(result).limit(Limits.byFitnessThreshold(7)).limit(50).peek(this.saveDecks(level));
     }
 
     public final Stream<EvolutionResult<IntegerGene, Integer>>
@@ -166,7 +166,7 @@ public final class DeckBuilderEngine {
         if (level == this.engines.size() - 1)
             return this.engines.get(level).stream(population).limit(Limits.bySteadyFitness(10)).peek(this.saveDecks(level));
         else
-            return this.engines.get(level).stream(population).limit(Limits.byFitnessThreshold(7)).limit(100).peek(this.saveDecks(level));
+            return this.engines.get(level).stream(population).limit(Limits.byFitnessThreshold(7)).limit(50).peek(this.saveDecks(level));
     }
 
     public final List<MagicCardDefinition> getSpellPool() {
