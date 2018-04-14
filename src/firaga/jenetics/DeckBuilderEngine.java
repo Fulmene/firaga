@@ -40,6 +40,7 @@ import io.jenetics.Genotype;
 import io.jenetics.IntegerChromosome;
 import io.jenetics.IntegerGene;
 import io.jenetics.Phenotype;
+import io.jenetics.SwapMutator;
 import io.jenetics.TournamentSelector;
 import io.jenetics.TruncationSelector;
 import io.jenetics.UniformCrossover;
@@ -74,7 +75,8 @@ public final class DeckBuilderEngine {
         .offspringSelector(new TournamentSelector<>(3))
         .alterers(
                 new UniformCrossover<>(1.0, 0.5),
-                new GaussianMutator<>(0.2));
+                new GaussianMutator<>(0.01),
+                new SwapMutator<>(0.2));
 
     private final List<Engine<IntegerGene, Integer>> engines;
     private final Factory<Genotype<IntegerGene>> gtf;
