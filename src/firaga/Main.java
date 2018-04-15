@@ -54,7 +54,7 @@ public final class Main {
             System.out.println(statistics);
 
             for (int level = 1; level < 4; level++) {
-                final EvolutionResult<IntegerGene, Integer> nextResult = engine.stream(result.getPopulation(), level).peek(statistics).collect(EvolutionResult.toBestEvolutionResult());
+                final EvolutionResult<IntegerGene, Integer> nextResult = engine.stream(result, level).peek(statistics).collect(EvolutionResult.toBestEvolutionResult());
                 System.out.println("End level " + level);
                 System.out.println(statistics);
                 result = nextResult;
