@@ -33,7 +33,7 @@ public final class MagicDeckCreator {
     public static final MagicDeck getMagicDeck(final List<MagicCardDefinition> cardPool, final Genotype<IntegerGene> genotype, final LandGenerator landGenerator) {
         final MagicDeck deck = new MagicDeck();
         IntStream.range(0, cardPool.size())
-            .forEach(i -> deck.addAll(Collections.nCopies(4, cardPool.get(i))));
+            .forEach(i -> deck.addAll(Collections.nCopies(4*genotype.get(0, i).intValue(), cardPool.get(i))));
         deck.setDeckType(DeckType.Custom);
         landGenerator.addLands(deck);
         return deck;
